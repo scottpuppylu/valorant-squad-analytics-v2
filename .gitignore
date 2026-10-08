@@ -14,6 +14,8 @@ npm-debug.log*
 !.env.example
 !infra/local/.env.example
 .local/
+# Private operator reports over real data (never committed, never published)
+.private/
 
 # Generated public snapshots (reproducible with npm run snapshot:demo)
 apps/web/public/public-data/

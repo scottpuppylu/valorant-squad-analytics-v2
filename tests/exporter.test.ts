@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { BASIC_PLAYER_STATS_ALGORITHM, computeBasicPlayerStats, summarizeObservations } from '@vsa/analytics';
 import { DEMO_CONSENTS, DEMO_GROUP, DEMO_MEMBERS } from '@vsa/collector';
-import { buildPublicSnapshot, deriveSnapshotId, publicMemberId, type ExportInput } from '@vsa/exporter';
+import { buildPublicSnapshot, deriveSnapshotId, ExportPopulationError, publicMemberId, type ExportInput } from '@vsa/exporter';
 import { PrivacyViolation } from '@vsa/privacy';
 import { FAKE_MATCHES, normalizeFakeMatch, PRIVATE_FIXTURE_MARKERS } from '@vsa/source-adapters/fake';
-import { demoResolver, OBSERVED_AT } from './helpers.ts';
+import { demoProduct, demoResolver, OBSERVED_AT } from './helpers.ts';
 
 function demoInput(overrides: Partial<ExportInput> = {}): ExportInput {
   const matches = FAKE_MATCHES.map((p) => normalizeFakeMatch(p, demoResolver, OBSERVED_AT));
@@ -12,7 +12,7 @@ function demoInput(overrides: Partial<ExportInput> = {}): ExportInput {
   return {
     group: DEMO_GROUP, members: DEMO_MEMBERS, consents: DEMO_CONSENTS, analysis: computeBasicPlayerStats(matches, ids),
     algorithms: [{ algorithmId: BASIC_PLAYER_STATS_ALGORITHM, description: 'basic' }], observations: summarizeObservations(matches, ids),
-    provenanceSummary: 'test provenance', ...overrides,
+    provenanceSummary: 'test provenance', product: demoProduct(overrides.consents ?? DEMO_CONSENTS), ...overrides,
   };
 }
 const doc = (snapshot: ReturnType<typeof buildPublicSnapshot>, kind: string) => JSON.parse(snapshot.files.find((f) => f.kind === kind)!.content);
@@ -22,9 +22,12 @@ describe('public exporter', () => {
     const consents = DEMO_CONSENTS.map((c) => (c.memberId === 'member-rook' ? { ...c, groupVisibilityAllowed: false } : c));
     const snap = buildPublicSnapshot(demoInput({ consents }));
     const names = doc(snap, 'group').members.map((m: { displayName: string }) => m.displayName);
-    expect(names.sort()).toEqual(['Juno', 'Kite', 'Nova', 'Vex']); // Pike: no public consent; Rook: no visibility
-    expect(doc(snap, 'analytics').players).toHaveLength(4);
-    expect(doc(snap, 'players').players).toHaveLength(4);
+    expect(names.sort()).toEqual(['Juno', 'Kite', 'Nova', 'Sol', 'Vex']); // Pike: no public consent; Rook: no visibility
+    for (const kind of ['analytics', 'players']) expect(doc(snap, kind).players).toHaveLength(5);
+    expect(doc(snap, 'profiles').profiles).toHaveLength(5);
+    const pid = (m: string) => publicMemberId('group-demo', m);
+    const text = snap.files.map((f) => f.content).join(String.fromCharCode(10));
+    for (const hidden of ['member-rook', 'member-pike']) expect(text).not.toContain(pid(hidden));
   });
 
   it('emits no internal or provider identifiers, refs or coordinates', () => {
@@ -52,6 +55,11 @@ describe('public exporter', () => {
     }
     const input = demoInput(); const p = input.analysis.players[0]!;
     expect(() => buildPublicSnapshot({ ...input, analysis: { ...input.analysis, players: [{ ...p, sampleSize: { ...p.sampleSize, refreshToken: 't' } as never }] } })).toThrow(PrivacyViolation);
+  });
+
+  it('refuses product analytics computed over a population that includes a withheld member', () => {
+    const everyone = demoProduct(DEMO_CONSENTS.map((c) => ({ ...c, publicDerivedAnalyticsAllowed: true })));
+    expect(() => buildPublicSnapshot(demoInput({ product: everyone }))).toThrow(ExportPopulationError);
   });
 
   it('dataAsOf is the latest observed match start of a published member (data-derived)', () => {

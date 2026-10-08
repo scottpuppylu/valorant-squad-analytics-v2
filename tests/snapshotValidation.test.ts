@@ -5,7 +5,7 @@ const ID = 'ps1-0123456789abcdef';
 const manifest = (active: Record<string, unknown> = {}, extra: Record<string, unknown> = {}) => ({
   manifestVersion: 'manifest-v1',
   active: {
-    snapshotId: ID, snapshotVersion: 'public-snapshot-v1', path: `snapshots/${ID}`,
+    snapshotId: ID, snapshotVersion: 'public-snapshot-v2', path: `snapshots/${ID}`,
     files: [{ kind: 'group', name: 'group.json', sha256: 'a'.repeat(64), bytes: 10 }],
     activatedAt: '2026-10-01T00:00:00.000Z', ...active,
   },
@@ -41,6 +41,6 @@ describe('manifest validation', () => {
 
   it('rejects unsupported versions', () => {
     expect(() => validateManifest({ ...manifest(), manifestVersion: 'manifest-v0' })).toThrow(PrivacyViolation);
-    expect(() => validateManifest(manifest({ snapshotVersion: 'public-snapshot-v2' }))).toThrow(PrivacyViolation);
+    expect(() => validateManifest(manifest({ snapshotVersion: 'public-snapshot-v1' }))).toThrow(PrivacyViolation);
   });
 });

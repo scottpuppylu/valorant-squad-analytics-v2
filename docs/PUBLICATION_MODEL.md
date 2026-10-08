@@ -4,7 +4,8 @@
 
 ```
 manifest.json                      the only mutable file (manifest-v1)
-snapshots/<snapshotId>/            immutable: group.json, players.json, analytics.json (public-snapshot-v1)
+snapshots/<snapshotId>/            immutable: group.json, players.json, analytics.json, profiles.json, shared-match.json,
+                                   team-builder.json (public-snapshot-v2)
 .staging/                          temporary; never referenced by a manifest
 ```
 

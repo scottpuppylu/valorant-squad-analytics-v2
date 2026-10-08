@@ -8,6 +8,7 @@
  */
 export const CANONICAL_SCHEMA_VERSION = 'canonical-schema-v2' as const;
 export const ANALYTICS_CONTRACT_VERSION = 'analytics-contract-v1' as const;
-export const PUBLIC_SNAPSHOT_VERSION = 'public-snapshot-v1' as const;
+/** v2 (V2-PRODUCT-UI-WAVE-01): adds profiles / shared-match / team-builder product documents and group coverage. */
+export const PUBLIC_SNAPSHOT_VERSION = 'public-snapshot-v2' as const;
 export const MANIFEST_VERSION = 'manifest-v1' as const;
 export const CONTROL_CONTRACT_VERSION = 'control-contract-v2' as const;

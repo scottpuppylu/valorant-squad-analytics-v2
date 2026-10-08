@@ -21,7 +21,7 @@ describe.skipIf(!url)('PostgreSQL 18 integration (opt-in)', () => {
       expect(await applyMigrations(sql)).toEqual([]);
       const embedded = await runDemoPipeline({ outDir: `${root}/pglite`, sql: createSqlClient(), now: () => OBSERVED_AT, activatedAt: ACTIVATED_AT });
       expect(pg.snapshotId).toBe(embedded.snapshotId);
-      expect(pg).toMatchObject({ database: 'postgresql', matchesConsidered: 8, membersPublished: 5 });
+      expect(pg).toMatchObject({ database: 'postgresql', matchesConsidered: 62, membersPublished: 6 });
     } finally {
       await sql.close();
     }

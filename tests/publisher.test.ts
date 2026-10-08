@@ -9,13 +9,13 @@ import { LocalFilesystemPublisher } from '@vsa/distribution';
 import { buildPublicSnapshot } from '@vsa/exporter';
 import { PrivacyViolation, validateManifest } from '@vsa/privacy';
 import { FAKE_MATCHES, normalizeFakeMatch } from '@vsa/source-adapters/fake';
-import { ACTIVATED_AT, demoResolver, OBSERVED_AT, withTempDir } from './helpers.ts';
+import { ACTIVATED_AT, demoProduct, demoResolver, OBSERVED_AT, withTempDir } from './helpers.ts';
 
 function snapshot(summary = 'A'): BuiltSnapshot {
   const matches = FAKE_MATCHES.map((p) => normalizeFakeMatch(p, demoResolver, OBSERVED_AT));
   const ids = DEMO_MEMBERS.map((m) => m.memberId);
   return buildPublicSnapshot({ group: DEMO_GROUP, members: DEMO_MEMBERS, consents: DEMO_CONSENTS, analysis: computeBasicPlayerStats(matches, ids),
-    algorithms: [{ algorithmId: BASIC_PLAYER_STATS_ALGORITHM, description: 'basic' }], observations: summarizeObservations(matches, ids), provenanceSummary: summary });
+    algorithms: [{ algorithmId: BASIC_PLAYER_STATS_ALGORITHM, description: 'basic' }], observations: summarizeObservations(matches, ids), provenanceSummary: summary, product: demoProduct() });
 }
 
 /** The reader invariant: an observed manifest always references existing files with matching hashes. */
@@ -35,7 +35,7 @@ describe('LocalFilesystemPublisher', () => {
     expect(result).toMatchObject({ snapshotId: s.snapshotId, reusedExistingSnapshot: false });
     const manifest = await assertReadable(root);
     expect(manifest).toMatchObject({ active: { snapshotId: s.snapshotId, path: `snapshots/${s.snapshotId}`, activatedAt: ACTIVATED_AT }, history: [] });
-    expect((await readdir(join(root, 'snapshots', s.snapshotId))).sort()).toEqual(['analytics.json', 'group.json', 'players.json']);
+    expect((await readdir(join(root, 'snapshots', s.snapshotId))).sort()).toEqual(['analytics.json', 'group.json', 'players.json', 'profiles.json', 'shared-match.json', 'team-builder.json']);
   }));
 
   it('re-publishing identical content reuses the immutable snapshot', () => withTempDir(async (root) => {
@@ -89,7 +89,7 @@ describe('LocalFilesystemPublisher', () => {
   it('refuses tampered, mislabelled or non-content-derived snapshots before writing anything', () => withTempDir(async (root) => {
     const publisher = new LocalFilesystemPublisher(root);
     const s = snapshot();
-    const tampered = { ...s, files: s.files.map((f) => (f.kind === 'group' ? { ...f, content: f.content.replace('Demo Squad', 'Evil Squad') } : f)) };
+    const tampered = { ...s, files: s.files.map((f) => (f.kind === 'group' ? { ...f, content: f.content.replace(DEMO_GROUP.name, 'Evil Squad') } : f)) };
     await expect(publisher.publish(tampered)).rejects.toThrow(PrivacyViolation);
     await expect(publisher.publish({ ...s, snapshotId: 'ps1-ffffffffffffffff' })).rejects.toThrow(PrivacyViolation);
     await expect(publisher.publish({ ...s, snapshotId: '../../escape' })).rejects.toThrow();
@@ -102,7 +102,7 @@ describe('LocalFilesystemPublisher', () => {
     await publisher.publish(a); await publisher.publish(b);
     await expect(publisher.rollback('../../etc')).rejects.toThrow();
     const file = join(root, 'snapshots', a.snapshotId, 'group.json');
-    await writeFile(file, (await readFile(file, 'utf8')).replace('"Demo Squad"', '"Demo Squad", "puuid": "fake-puuid-x"'), 'utf8');
+    await writeFile(file, (await readFile(file, 'utf8')).replace(JSON.stringify(DEMO_GROUP.name), `${JSON.stringify(DEMO_GROUP.name)}, "puuid": "fake-puuid-x"`), 'utf8');
     await expect(publisher.rollback(a.snapshotId)).rejects.toThrow(PrivacyViolation);
     expect((await assertReadable(root)).active.snapshotId).toBe(b.snapshotId);
   }));

@@ -12,7 +12,8 @@
     "./canonical": "./src/canonical.ts",
     "./analysis": "./src/analysis.ts",
     "./team-composition": "./src/teamComposition.ts",
-    "./public": "./src/public.ts"
+    "./public": "./src/public.ts",
+    "./product": "./src/product.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"

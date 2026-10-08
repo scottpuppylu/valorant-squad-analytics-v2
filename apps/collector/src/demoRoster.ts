@@ -6,9 +6,9 @@ import { FAKE_ACCOUNTS } from '@vsa/source-adapters/fake';
  * consent). "Pike" deliberately withholds PUBLIC derived analytics: the snapshot must not contain them.
  */
 const T0 = '2026-09-01T00:00:00.000Z';
-export const DEMO_GROUP: Group = { groupId: 'group-demo', slug: 'demo-squad', name: 'Demo Squad', visibility: 'invite-only', createdAt: T0 };
+export const DEMO_GROUP: Group = { groupId: 'group-demo', slug: 'demo-squad', name: '哥布林大調查（示範資料）', visibility: 'invite-only', createdAt: T0 };
 
-const NAMES = ['Nova', 'Rook', 'Vex', 'Kite', 'Juno', 'Pike'] as const;
+const NAMES = ['Nova', 'Rook', 'Vex', 'Kite', 'Juno', 'Sol', 'Pike'] as const;
 
 export const DEMO_MEMBERS: GroupMember[] = NAMES.map((name) => ({
   memberId: `member-${name.toLowerCase()}`, groupId: DEMO_GROUP.groupId, displayName: name, status: 'active', joinedAt: T0,

@@ -1,16 +1,25 @@
-import type { PublicAnalysisSnapshot, PublicGroupSnapshot, PublicPlayerSnapshot, SnapshotManifest } from '@vsa/contracts/public';
+import type {
+  PublicAnalysisSnapshot, PublicFileKind, PublicGroupSnapshot, PublicPlayerSnapshot, PublicProfileSnapshot, PublicSharedMatchSnapshot, PublicTeamBuilderSnapshot, SnapshotManifest,
+} from '@vsa/contracts/public';
 import { MANIFEST_VERSION, PUBLIC_SNAPSHOT_VERSION } from '@vsa/contracts/versions';
 import { PrivacyViolation, validateManifest, validatePublicDocument } from '@vsa/privacy';
 
 /** The static data path: manifest.json → immutable snapshot files. No database, no provider, no server API. */
 export type SnapshotState =
   | { status: 'loading' }
-  | { status: 'ready'; manifest: SnapshotManifest; group: PublicGroupSnapshot; players: PublicPlayerSnapshot; analytics: PublicAnalysisSnapshot }
+  | ({ status: 'ready'; manifest: SnapshotManifest } & SnapshotDocuments)
   | { status: 'empty'; detail: string }
   | { status: 'invalid-manifest'; detail: string }
   | { status: 'unsupported-version'; detail: string }
   | { status: 'missing-snapshot'; detail: string }
   | { status: 'privacy-failure'; detail: string };
+
+/** Every document a v2 snapshot must contain (validated, strict). */
+export interface SnapshotDocuments {
+  group: PublicGroupSnapshot; players: PublicPlayerSnapshot; analytics: PublicAnalysisSnapshot;
+  profiles: PublicProfileSnapshot; sharedMatch: PublicSharedMatchSnapshot; teamBuilder: PublicTeamBuilderSnapshot;
+}
+export type ReadySnapshot = Extract<SnapshotState, { status: 'ready' }>;
 
 export interface FetchedText { ok: boolean; status: number; text(): Promise<string> }
 export type Fetcher = (path: string, init?: { cache?: 'no-store' | 'default' }) => Promise<FetchedText>;
@@ -47,7 +56,7 @@ export async function loadSnapshot(fetcher: Fetcher, base = 'public-data'): Prom
   let manifest: SnapshotManifest;
   try { manifest = validateManifest(raw); } catch (error) { return { status: 'invalid-manifest', detail: describe(error) }; }
 
-  const documents: Partial<Record<'group' | 'players' | 'analytics', unknown>> = {};
+  const documents: Partial<Record<PublicFileKind, unknown>> = {};
   for (const file of manifest.active.files) {
     // path and name are fixed patterns validated above: no traversal is expressible.
     const fileResponse = await fetcher(`${base}/${manifest.active.path}/${file.name}`).catch(() => null);
@@ -60,10 +69,13 @@ export async function loadSnapshot(fetcher: Fetcher, base = 'public-data'): Prom
     if ((json as { snapshotVersion?: unknown } | null)?.snapshotVersion !== PUBLIC_SNAPSHOT_VERSION) return { status: 'unsupported-version', detail: `${file.name} has an unsupported snapshot version` };
     try { documents[file.kind] = validatePublicDocument(file.kind, json); } catch (error) { return { status: 'privacy-failure', detail: `${file.name}: ${describe(error)}` }; }
   }
-  const { group, players, analytics } = documents as { group?: PublicGroupSnapshot; players?: PublicPlayerSnapshot; analytics?: PublicAnalysisSnapshot };
-  if (!group || !players || !analytics) return { status: 'missing-snapshot', detail: 'the snapshot does not contain group, players and analytics documents' };
-  if (group.members.length === 0) return { status: 'empty', detail: 'This snapshot has no visible members.' };
-  return { status: 'ready', manifest, group, players, analytics };
+  const d = documents as Partial<{ group: PublicGroupSnapshot; players: PublicPlayerSnapshot; analytics: PublicAnalysisSnapshot; profiles: PublicProfileSnapshot;
+    'shared-match': PublicSharedMatchSnapshot; 'team-builder': PublicTeamBuilderSnapshot }>;
+  if (!d.group || !d.players || !d.analytics || !d.profiles || !d['shared-match'] || !d['team-builder']) {
+    return { status: 'missing-snapshot', detail: 'the snapshot does not contain every required document (group, players, analytics, profiles, shared-match, team-builder)' };
+  }
+  if (d.group.members.length === 0) return { status: 'empty', detail: 'This snapshot has no visible members.' };
+  return { status: 'ready', manifest, group: d.group, players: d.players, analytics: d.analytics, profiles: d.profiles, sharedMatch: d['shared-match'], teamBuilder: d['team-builder'] };
 }
 
 /** Browser fetcher: the manifest is fetched fresh; snapshot files are immutable and may be cached. */

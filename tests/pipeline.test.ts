@@ -6,9 +6,9 @@ import { ACTIVATED_AT, OBSERVED_AT, withTempDir } from './helpers.ts';
 describe('end-to-end vertical slice (no cloud, no provider network, embedded PostgreSQL)', () => {
   it('fake provider → canonical store → analytics → exporter → local publisher → manifest', () => withTempDir(async (root) => {
     const first = await runDemoPipeline({ outDir: root, now: () => OBSERVED_AT, activatedAt: ACTIVATED_AT });
-    expect(first).toMatchObject({ database: 'embedded-pglite', migrationsApplied: ['0001', '0002'], matchesStored: 10, matchesConsidered: 8, membersTotal: 6, membersPublished: 5, reusedExistingSnapshot: false });
+    expect(first).toMatchObject({ database: 'embedded-pglite', migrationsApplied: ['0001', '0002'], matchesStored: 72, matchesConsidered: 62, membersTotal: 7, membersPublished: 6, reusedExistingSnapshot: false });
     const scan = await scanPublicData(root);
-    expect(scan.files).toBe(4);
+    expect(scan.files).toBe(7); // manifest + six documents
     expect(scan.findings).toEqual([]);
   }));
 

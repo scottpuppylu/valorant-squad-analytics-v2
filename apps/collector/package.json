@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Local collector: provider adapter → canonical store → analytics → public snapshot → publisher. Runs on Node 24 directly from TypeScript.",
+  "description": "Local collector: provider adapter \u2192 canonical store \u2192 analytics \u2192 public snapshot \u2192 publisher. Runs on Node 24 directly from TypeScript.",
   "exports": {
     ".": "./src/index.ts"
   },
@@ -16,6 +16,7 @@
     "@vsa/contracts": "*",
     "@vsa/distribution": "*",
     "@vsa/exporter": "*",
+    "@vsa/privacy": "*",
     "@vsa/source-adapters": "*"
   }
 }

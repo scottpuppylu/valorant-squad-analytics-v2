@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { PostgresCanonicalRepository, SqlClient } from '@vsa/canonical-data';
-import { DEMO_CONSENTS, IngestService } from '@vsa/collector';
+import { DEMO_CONSENTS, DEMO_GROUP, IngestService } from '@vsa/collector';
 import { FakeProviderAdapter } from '@vsa/source-adapters';
 import { FAKE_MATCHES, normalizeFakeMatch } from '@vsa/source-adapters/fake';
 import { demoResolver, freshDatabase, OBSERVED_AT, seedDemoRoster } from './helpers.ts';
@@ -37,21 +37,21 @@ describe('PostgresCanonicalRepository (embedded PostgreSQL)', () => {
   });
 
   it('round-trips control metadata (group, members, consent)', async () => {
-    expect((await repository.getGroup('group-demo'))?.name).toBe('Demo Squad');
-    expect((await repository.listMembers('group-demo')).map((m) => m.displayName).sort()).toEqual(['Juno', 'Kite', 'Nova', 'Pike', 'Rook', 'Vex']);
+    expect((await repository.getGroup('group-demo'))?.name).toBe(DEMO_GROUP.name);
+    expect((await repository.listMembers('group-demo')).map((m) => m.displayName).sort()).toEqual(['Juno', 'Kite', 'Nova', 'Pike', 'Rook', 'Sol', 'Vex']);
     expect(await repository.listConsents('group-demo')).toEqual([...DEMO_CONSENTS].sort((a, b) => a.memberId.localeCompare(b.memberId)));
   });
 
   it('ingest stores every fake match once, records ingest state and links only consenting members', async () => {
     const noCollection = DEMO_CONSENTS.map((c) => (c.memberId === 'member-kite' ? { ...c, dataCollectionAllowed: false } : c));
     for (const c of noCollection) await repository.upsertConsent(c);
-    const summary = await new IngestService(repository, new FakeProviderAdapter(), () => OBSERVED_AT).ingestGroup('group-demo');
-    expect(summary).toMatchObject({ accountsConsidered: 6, accountsSkippedNoConsent: 1, matchesStored: 10 });
-    expect(await count('provider_ingest_state')).toBe(5);
+    const summary = await new IngestService(repository, new FakeProviderAdapter(), () => OBSERVED_AT).ingestGroup('group-demo', { maxMatchesPerAccount: 200 });
+    expect(summary).toMatchObject({ accountsConsidered: 7, accountsSkippedNoConsent: 1, matchesStored: FAKE_MATCHES.length });
+    expect(await count('provider_ingest_state')).toBe(6);
     const linked = (await sql.query<{ n: string }>(`SELECT count(*)::text AS n FROM match_participants WHERE member_id='member-kite'`)).rows[0]!.n;
     expect(Number(linked)).toBe(0);
-    const again = await new IngestService(repository, new FakeProviderAdapter(), () => OBSERVED_AT).ingestGroup('group-demo');
+    const again = await new IngestService(repository, new FakeProviderAdapter(), () => OBSERVED_AT).ingestGroup('group-demo', { maxMatchesPerAccount: 200 });
     expect(again.matchesStored).toBe(0);
-    expect(await count('matches')).toBe(10);
+    expect(await count('matches')).toBe(FAKE_MATCHES.length);
   });
 });

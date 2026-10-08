@@ -17,7 +17,7 @@ describe('fake payload → canonical normalization', () => {
   it('produces a valid canonical match with explicit versions and provenance', () => {
     expect(CanonicalMatch.parse(match)).toEqual(match);
     expect(match.schemaVersion).toBe(CANONICAL_SCHEMA_VERSION);
-    expect(match.source).toEqual({ providerId: 'fake', providerVersion: 'fake-provider-v1', normalizerVersion: 'fake-normalizer-v2', providerRecordRef: payload.fakeMatchId, observedAt: OBSERVED_AT,
+    expect(match.source).toEqual({ providerId: 'fake', providerVersion: 'fake-provider-v2', normalizerVersion: 'fake-normalizer-v3', providerRecordRef: payload.fakeMatchId, observedAt: OBSERVED_AT,
       acquisition: 'provider-adapter', acquisitionSource: 'fake-provider' });
     expect(match.evidence.historyCompleteness).toBe('provider-visible');
   });
@@ -26,26 +26,31 @@ describe('fake payload → canonical normalization', () => {
     expect(match.matchKey).toBe(canonicalMatchKey('fake', payload.fakeMatchId));
     expect(match.matchKey).not.toContain(payload.fakeMatchId);
     const keys = keysOf(match);
-    for (const providerField of ['fakePuuid', 'fakeMatchId', 'killLog', 'roundResults', 'victimPos', 'px', 'py', 'facing', 'dmg', 'side']) expect(keys.has(providerField)).toBe(false);
+    for (const providerField of ['fakePuuid', 'fakeMatchId', 'killLog', 'how', 'victimPos', 'px', 'py', 'facing', 'dmg', 'side', 'seen', 'lines', 'econ', 'casts']) expect(keys.has(providerField)).toBe(false);
     expect(match.teams.map((t) => t.teamKey)).toEqual(['team-1', 'team-2']);
   });
 
   it('maps tracked participants to internal ids and never carries provider account ids', () => {
     const tracked = match.participants.filter((p) => p.memberId !== null);
-    expect(tracked).toHaveLength(4);
+    expect(tracked).toHaveLength(5); // match 1: Nova, Rook, Vex, Sol and Pike
     for (const p of tracked) expect(p.accountId).toMatch(/^account-/u);
-    expect(match.participants.filter((p) => p.memberId === null)).toHaveLength(6);
+    expect(match.participants.filter((p) => p.memberId === null)).toHaveLength(5);
     expect(JSON.stringify(match)).not.toContain('fake-puuid-');
   });
 
   it('keeps raw spatial evidence only in the private canonical event', () => {
     expect(match.events.length).toBeGreaterThan(0);
-    expect(match.events.every((e) => e.location !== null && Number.isFinite(e.location.x) && e.playerSnapshots.length === 1)).toBe(true);
+    expect(match.events.every((e) => e.location !== null && Number.isFinite(e.location.x))).toBe(true);
+    expect(match.events.some((e) => e.playerSnapshots.length > 0)).toBe(true);
+    // the victim is never in its own kill's snapshot
+    expect(match.events.every((e) => e.playerSnapshots.every((s) => s.participantKey !== e.targetParticipantKey))).toBe(true);
+    expect(match.rounds.some((r) => r.plant.status === 'present' && r.plant.site !== null && r.plant.location !== null)).toBe(true);
   });
 
   it('maps modes and preserves damage-evidence completeness', () => {
-    expect(normalizeFakeMatch(FAKE_MATCHES[4]!, demoResolver, OBSERVED_AT).mode).toBe('unrated');
-    const noDamage = normalizeFakeMatch(FAKE_MATCHES[9]!, demoResolver, OBSERVED_AT);
+    expect(normalizeFakeMatch(FAKE_MATCHES[7]!, demoResolver, OBSERVED_AT).mode).toBe('unrated');
+    expect(normalizeFakeMatch(FAKE_MATCHES[30]!, demoResolver, OBSERVED_AT).mode).toBe('swiftplay');
+    const noDamage = normalizeFakeMatch(FAKE_MATCHES[15]!, demoResolver, OBSERVED_AT);
     expect(noDamage.evidence).toMatchObject({ hasDamage: false, evidenceQuality: 'partial', rounds: 'observed', kills: 'observed' });
     expect(noDamage.participants.every((p) => p.stats.damageDealt === null)).toBe(true);
   });

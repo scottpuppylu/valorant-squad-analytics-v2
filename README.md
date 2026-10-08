@@ -39,7 +39,8 @@ npm run web:dev
 5. The exporter builds the public snapshot.
 6. The snapshot is published atomically to `apps/web/public/public-data/`.
 
-The web app then renders the Dashboard from that static snapshot.
+The web app then renders the product pages (Dashboard, Players, Player Profile, Compare, Shared-Match, Team Builder,
+About) from that static snapshot. Formulas: [docs/SCORING.md](docs/SCORING.md).
 
 Optional local PostgreSQL 18 (localhost only): copy `infra/local/.env.example` to `infra/local/.env`, then run
 `npm run db:up` and `npm run db:migrate` with `DATABASE_URL` set (see `.env.example`).
@@ -55,6 +56,7 @@ Optional local PostgreSQL 18 (localhost only): copy `infra/local/.env.example` t
 | `npm run check:privacy` | Regenerates the demo snapshot, builds the web app, then scans public data and the bundle for private data |
 | `npm run snapshot:demo` / `npm run web:dev` | Offline demo snapshot / Vite dev server |
 | `VSA_PG18_URL=… npm test` | Also runs the opt-in real PostgreSQL 18 integration test (use a disposable database) |
+| `npm run report:private -- --group <id>` | PRIVATE operator report over a local `DATABASE_URL` (read-only), written only under the git-ignored `.private/`; never a snapshot ([docs/V2_PRODUCT_UI.md](docs/V2_PRODUCT_UI.md)) |
 | `npm run import:legacy -- [--dry-run] [--resume]` | Read-only import of the accepted legacy private staging into a local `valorant_analytics_v2*` database ([docs/V2_DATA_IMPORT.md](docs/V2_DATA_IMPORT.md)) |
 
 Node 24 runs the TypeScript sources directly (type stripping, `erasableSyntaxOnly`). A workspace's `build` is a strict

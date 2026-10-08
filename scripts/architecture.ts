@@ -29,8 +29,8 @@ export function importSpecifiers(source: string): string[] {
 
 const isDb = (s: string) => s === 'pg' || s.startsWith('pg/') || s.startsWith('@electric-sql/pglite') || s.startsWith('@vsa/canonical-data');
 const isProviderSpecific = (s: string) => s.startsWith('@vsa/source-adapters') || /henrik|riot|overwolf|tracker|blitz/iu.test(s) || /(^|\/)fake(\/|$)/u.test(s);
-const WEB_ALLOWED = [/^react$/u, /^react\/jsx-runtime$/u, /^react-dom$/u, /^react-dom\/client$/u, /^@vsa\/contracts\/(public|versions|common|team-composition)$/u, /^@vsa\/privacy$/u, /^\.\.?\//u];
-const ANALYTICS_ALLOWED = [/^@vsa\/contracts\/(canonical|analysis|common|versions|team-composition)$/u, /^\.\.?\//u];
+const WEB_ALLOWED = [/^react$/u, /^react\/jsx-runtime$/u, /^react-dom$/u, /^react-dom\/client$/u, /^@vsa\/contracts\/(public|versions|common|team-composition|product)$/u, /^@vsa\/privacy$/u, /^\.\.?\//u];
+const ANALYTICS_ALLOWED = [/^@vsa\/contracts\/(canonical|analysis|common|versions|team-composition|product)$/u, /^\.\.?\//u];
 const CONTROL_FORBIDDEN = (s: string) => isDb(s) || s.startsWith('@vsa/analytics') || s.startsWith('@vsa/source-adapters') || s.startsWith('@vsa/collector')
   || s === '@vsa/contracts' || s === '@vsa/contracts/canonical' || s === '@vsa/contracts/analysis';
 const BROWSER_SAFE_WORKSPACES = new Set(['packages/contracts', 'packages/privacy', 'apps/web']);

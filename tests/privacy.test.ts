@@ -4,10 +4,11 @@ import { PUBLIC_DOCUMENT_SCHEMAS, type PublicFileKind } from '@vsa/contracts/pub
 import { findPrivateKeys, PrivacyViolation, PUBLIC_ALLOWLIST, toPublicDocument, validatePublicDocument, type FieldSpec } from '@vsa/privacy';
 
 const validGroup = () => ({
-  snapshotVersion: 'public-snapshot-v1',
+  snapshotVersion: 'public-snapshot-v2',
   group: { publicGroupId: 'g_0123456789abcdef', name: 'Demo' },
   members: [{ publicMemberId: 'm_0123456789abcdef', displayName: 'Nova' }],
   provenance: { historyCompleteness: 'provider-visible', lifetimeComplete: false, summary: 'synthetic' },
+  coverage: { firstMatchAt: null, lastMatchAt: null, matchesObserved: 0, competitiveMatches: 0 },
   dataAsOf: null,
 });
 

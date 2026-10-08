@@ -4,7 +4,8 @@ import { join } from 'node:path';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { runDemoPipeline } from '@vsa/collector';
-import { Page } from '../apps/web/src/App.tsx';
+import { Page, Shell } from '../apps/web/src/App.tsx';
+import { DEMO_GROUP } from '@vsa/collector';
 import { StatusView } from '../apps/web/src/components/StatusView.tsx';
 import { loadSnapshot, type Fetcher, type SnapshotState } from '../apps/web/src/data/loadSnapshot.ts';
 import { ROUTES } from '../apps/web/src/router.ts';
@@ -28,8 +29,8 @@ describe('static web loading', () => {
     const { snapshotId } = await publish(root);
     const state = await loadSnapshot(fsFetcher(root));
     expect(state.status).toBe('ready');
-    const html = renderToString(<Page route="/" state={state} />);
-    for (const text of ['Demo Squad', snapshotId, 'public-snapshot-v1', 'Nova', 'Juno', 'K/D', 'ADR']) expect(html).toContain(text);
+    const html = renderToString(<Shell route={{ page: 'dashboard' }} state={state} />);
+    for (const text of [DEMO_GROUP.name, snapshotId, 'public-snapshot-v2', 'Nova', 'Juno', '目前實力', '目前可追蹤紀錄']) expect(html).toContain(text);
     expect(html).not.toContain('Pike');
     expect(renderToString(<Page route="/players" state={state} />)).toContain('Rook');
   }));
@@ -64,7 +65,7 @@ describe('static web loading', () => {
   it('a file that does not match its manifest hash is refused', () => withTempDir(async (root) => {
     const { snapshotId } = await publish(root);
     const f = join(root, 'snapshots', snapshotId, 'group.json');
-    await writeFile(f, (await readFile(f, 'utf8')).replace('Demo Squad', 'Other Squad'), 'utf8');
+    await writeFile(f, (await readFile(f, 'utf8')).replace(DEMO_GROUP.name, 'Other Squad'), 'utf8');
     expect((await loadSnapshot(fsFetcher(root))).status).toBe('invalid-manifest');
   }));
 

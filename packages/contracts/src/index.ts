@@ -4,4 +4,5 @@ export * from './control.ts';
 export * from './canonical.ts';
 export * from './analysis.ts';
 export * from './teamComposition.ts';
+export * from './product.ts';
 export * from './public.ts';

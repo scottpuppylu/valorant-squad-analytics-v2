@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { AnalysisResult } from '@vsa/contracts/analysis';
 import type { ConsentState, Group, GroupMember } from '@vsa/contracts/control';
+import type { ProductAnalytics } from '@vsa/contracts/product';
 import { PUBLIC_FILE_NAMES, type BuiltSnapshot, type BuiltSnapshotFile, type PublicFileKind } from '@vsa/contracts/public';
 import { PUBLIC_SNAPSHOT_VERSION } from '@vsa/contracts/versions';
 import { toPublicDocument } from '@vsa/privacy';
@@ -25,20 +26,41 @@ export interface ExportInput {
   algorithms: readonly { algorithmId: string; description: string }[];
   observations: readonly { memberId: string; matchesObserved: number; firstObservedAt: string | null; lastObservedAt: string | null }[];
   provenanceSummary: string;
+  /** product-contract-v1 read models, computed over the VISIBLE population only (see visibleMemberIds). */
+  product: ProductAnalytics;
+}
+
+/** Members that may appear publicly: active membership plus group-visibility AND public-derived-analytics consent. */
+export function visibleMemberIds(members: readonly GroupMember[], consents: readonly ConsentState[]): string[] {
+  const consent = new Map(consents.map((c) => [c.memberId, c]));
+  return members.filter((m) => m.status === 'active' && consent.get(m.memberId)?.groupVisibilityAllowed === true && consent.get(m.memberId)?.publicDerivedAnalyticsAllowed === true)
+    .map((m) => m.memberId).sort();
+}
+
+export class ExportPopulationError extends Error {}
+
+/** Every internal member id the product read model mentions. */
+export function productMemberIds(product: ProductAnalytics): Set<string> {
+  return new Set([
+    ...product.profiles.map((p) => p.memberId), ...product.sharedMatch.members.map((m) => m.memberId),
+    ...product.sharedMatch.pairs.flatMap((p) => [p.memberA, p.memberB]), ...product.teamBuilder.results.flatMap((r) => r.memberIds),
+  ]);
 }
 
 /**
  * Builds the public snapshot. A member appears ONLY with active membership plus both group-visibility and
- * public-derived-analytics consent. Every document passes the explicit allowlist serializer (unknown or private
- * fields throw) before it is serialized deterministically.
+ * public-derived-analytics consent, and the product read models must have been computed over exactly that population
+ * (a withheld member's evidence never enters public analytics — enforced here, not assumed). Every document passes the
+ * explicit allowlist serializer (unknown or private fields throw) before it is serialized deterministically.
  */
 export function buildPublicSnapshot(input: ExportInput): BuiltSnapshot {
-  const consent = new Map(input.consents.map((c) => [c.memberId, c]));
-  const visible = input.members
-    .filter((m) => m.status === 'active' && consent.get(m.memberId)?.groupVisibilityAllowed === true && consent.get(m.memberId)?.publicDerivedAnalyticsAllowed === true)
-    .sort((a, b) => a.memberId.localeCompare(b.memberId));
-  const visibleIds = new Set(visible.map((m) => m.memberId));
+  const visibleIds = new Set(visibleMemberIds(input.members, input.consents));
+  const visible = input.members.filter((m) => visibleIds.has(m.memberId)).sort((a, b) => a.memberId.localeCompare(b.memberId));
+  const product = input.product;
+  for (const id of productMemberIds(product)) if (!visibleIds.has(id)) throw new ExportPopulationError('product analytics contain a member outside the visible population');
   const pid = (memberId: string) => publicMemberId(input.group.groupId, memberId);
+  const name = new Map(visible.map((m) => [m.memberId, m.displayName]));
+  const profileOf = new Map(product.profiles.map((p) => [p.memberId, p]));
   const byMember = new Map(input.observations.map((o) => [o.memberId, o]));
   const lastTimes = visible.map((m) => byMember.get(m.memberId)?.lastObservedAt).filter((t): t is string => Boolean(t)).sort();
 
@@ -48,13 +70,15 @@ export function buildPublicSnapshot(input: ExportInput): BuiltSnapshot {
       group: { publicGroupId: publicGroupId(input.group.groupId), name: input.group.name },
       members: visible.map((m) => ({ publicMemberId: pid(m.memberId), displayName: m.displayName })),
       provenance: { historyCompleteness: input.analysis.scope.historyCompleteness, lifetimeComplete: false, summary: input.provenanceSummary },
+      coverage: { ...product.coverage },
       dataAsOf: lastTimes.at(-1) ?? null,
     },
     players: {
       snapshotVersion: PUBLIC_SNAPSHOT_VERSION,
       players: visible.map((m) => {
         const o = byMember.get(m.memberId);
-        return { publicMemberId: pid(m.memberId), displayName: m.displayName, matchesObserved: o?.matchesObserved ?? 0, firstObservedAt: o?.firstObservedAt ?? null, lastObservedAt: o?.lastObservedAt ?? null };
+        return { publicMemberId: pid(m.memberId), displayName: m.displayName, matchesObserved: o?.matchesObserved ?? 0, competitiveMatches: profileOf.get(m.memberId)?.competitiveMatches ?? 0,
+          firstObservedAt: o?.firstObservedAt ?? null, lastObservedAt: o?.lastObservedAt ?? null };
       }),
     },
     analytics: {
@@ -68,10 +92,39 @@ export function buildPublicSnapshot(input: ExportInput): BuiltSnapshot {
         eligible: p.eligibility.eligible, eligibilityReasons: [...p.eligibility.reasons],
       })),
     },
+    profiles: {
+      snapshotVersion: PUBLIC_SNAPSHOT_VERSION,
+      productContractVersion: product.productContractVersion,
+      profiles: [...product.profiles].sort((a, b) => a.memberId.localeCompare(b.memberId))
+        .map(({ memberId, ...rest }) => ({ publicMemberId: pid(memberId), displayName: name.get(memberId)!, ...rest })),
+    },
+    'shared-match': {
+      snapshotVersion: PUBLIC_SNAPSHOT_VERSION,
+      productContractVersion: product.productContractVersion,
+      algorithm: { version: product.sharedMatch.version, evidenceVersion: product.sharedMatch.evidenceVersion, neutralSigma: product.sharedMatch.neutralSigma,
+        shrinkK: product.sharedMatch.shrinkK, minMatches: product.sharedMatch.minMatches },
+      members: product.sharedMatch.members.map(({ memberId, ...rest }) => ({ publicMemberId: pid(memberId), ...rest })),
+      pairs: product.sharedMatch.pairs.map(({ memberA, memberB, ...rest }) => ({ memberA: pid(memberA), memberB: pid(memberB), ...rest })),
+      coverage: { ...product.sharedMatch.coverage },
+    },
+    'team-builder': {
+      snapshotVersion: PUBLIC_SNAPSHOT_VERSION,
+      productContractVersion: product.productContractVersion,
+      algorithm: { v1Version: product.teamBuilder.v1Version, v2Version: product.teamBuilder.v2Version, fitVersion: product.teamBuilder.fitVersion,
+        teamFitSemantics: 'historical-relative-lineup-fit', isWinProbability: false, isProvenOptimalLineup: false },
+      maps: [...product.teamBuilder.maps],
+      emittableAttack: [...product.teamBuilder.emittableAttack], emittableDefense: [...product.teamBuilder.emittableDefense], withheldLabels: [...product.teamBuilder.withheldLabels],
+      results: product.teamBuilder.results.map((r) => ({
+        ...r, memberIds: r.memberIds.map(pid),
+        lineups: r.lineups.map((l) => ({ ...l, members: l.members.map(({ memberId, ...m }) => ({ publicMemberId: pid(memberId), ...m })) })),
+      })),
+    },
   };
 
   const files = (Object.keys(PUBLIC_FILE_NAMES) as PublicFileKind[]).map((kind): BuiltSnapshotFile => {
-    const content = `${JSON.stringify(toPublicDocument(kind, documents[kind]), null, 2)}\n`;
+    // Small documents stay human-readable; the product documents are compact (the Team Builder table can be large).
+    const compact = kind === 'profiles' || kind === 'shared-match' || kind === 'team-builder';
+    const content = `${JSON.stringify(toPublicDocument(kind, documents[kind]), null, compact ? 0 : 2)}\n`;
     return { kind, name: PUBLIC_FILE_NAMES[kind], content, sha256: sha256(content), bytes: Buffer.byteLength(content, 'utf8') };
   });
   return { snapshotId: deriveSnapshotId(files), snapshotVersion: PUBLIC_SNAPSHOT_VERSION, files };

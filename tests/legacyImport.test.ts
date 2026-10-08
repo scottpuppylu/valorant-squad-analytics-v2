@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BASIC_PLAYER_STATS_ALGORITHM, computeBasicPlayerStats, resolveAgent, summarizeObservations } from '@vsa/analytics';
+import { BASIC_PLAYER_STATS_ALGORITHM, buildProductAnalytics, computeBasicPlayerStats, resolveAgent, summarizeObservations } from '@vsa/analytics';
 import type { PostgresCanonicalRepository, SqlClient } from '@vsa/canonical-data';
 import { ConsentState } from '@vsa/contracts/control';
 import { buildPublicSnapshot } from '@vsa/exporter';
@@ -160,7 +160,7 @@ describe('match / round / event / position normalization', () => {
     const ids = match.participants.map((p) => p.agentId);
     expect(ids).toContain(UNKNOWN_AGENT);
     expect(resolveAgent({ id: UNKNOWN_AGENT, name: 'Unknown' }).status).toBe('unknown');
-    expect(resolveAgent({ id: UNKNOWN_AGENT, name: 'Jett' })).toEqual({ status: 'unknown', reason: 'unknown_id' }); // never guessed from the name
+    expect(resolveAgent({ id: UNKNOWN_AGENT, name: 'Jett' })).toMatchObject({ status: 'unknown', reason: 'unknown_id' }); // never guessed from the name
     const miks = resolveAgent({ id: MIKS, name: 'Miks' });
     expect(miks.status === 'known' && miks.definition.role).toBe('Controller');
     expect(resolveAgent({ id: JETT }).status).toBe('known');
@@ -347,7 +347,8 @@ describe('position privacy and public safety of imported data', () => {
     const ids = members.map((m) => m.memberId);
     const matches = await repository.listMatchesForMembers(ids);
     const snapshot = buildPublicSnapshot({ group: IMPORT_GROUP, members, consents: await repository.listConsents(IMPORT_GROUP.groupId), analysis: computeBasicPlayerStats(matches, ids),
-      algorithms: [{ algorithmId: BASIC_PLAYER_STATS_ALGORITHM, description: 'basic' }], observations: summarizeObservations(matches, ids), provenanceSummary: 'private test' });
+      algorithms: [{ algorithmId: BASIC_PLAYER_STATS_ALGORITHM, description: 'basic' }], observations: summarizeObservations(matches, ids), provenanceSummary: 'private test',
+      product: buildProductAnalytics([], matches) });
     const text = snapshot.files.map((f) => f.content).join('\n');
     expect(JSON.parse(snapshot.files.find((f) => f.kind === 'group')!.content).members).toEqual([]);
     for (const forbidden of ['Alpha', 'legacy-fixture-puuid', mid(1), 'member-', 'account-', '5000.375']) expect(text).not.toContain(forbidden);

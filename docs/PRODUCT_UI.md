@@ -36,6 +36,7 @@ snapshot and privacy validation failure.
 
 ## Visual direction
 
-- The bootstrap uses a clean, responsive layout (no horizontal scroll at phone width; light and dark).
-- A visual redesign is a later wave (V2-PRODUCT-UI-WAVE-01).
+- V2-PRODUCT-UI-WAVE-01 implemented every route above with real content (see docs/V2_PRODUCT_UI.md §5): compact
+  cards, clear tables (stacked labelled rows under 640 px), light and dark themes, 哥布林大調查 identity.
+- Earlier bootstrap: a clean, responsive layout; the redesign was deferred to that wave.
 - No Riot, VALORANT or third-party assets or page designs are copied.
