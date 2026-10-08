@@ -4,14 +4,24 @@ Sources plug in as `DataProviderAdapter`s and declare their actual capabilities 
 information, **not** a runtime fact. Every source converts its payloads to canonical contracts inside its adapter, and
 analytics never sees provider types (enforced by `npm run check:architecture`).
 
-| Candidate | IDENTITY | HISTORICAL_MATCH | MATCH_DETAIL | FORWARD_LIVE | RANK | STATIC_CONTENT | Status / constraints |
+Evidence and per-provider details: [PROVIDER_MATRIX.md](PROVIDER_MATRIX.md). Design: [PROVIDER_ARCHITECTURE.md](PROVIDER_ARCHITECTURE.md)
+(V2-PROVIDER-WAVE-01). The states below stay distinct:
+- **IMPLEMENTED** = runtime-declared by an adapter in this repository.
+- **DOCUMENTED** = publicly documented by the provider, not implemented here.
+- **UNKNOWN** = unproven.
+- **FUTURE** = planned, with no code path.
+- **PARTNER_ONLY** = needs a business agreement.
+
+| Source | IDENTITY | MATCH_HISTORY | MATCH_DETAIL | RANK | FORWARD_LIVE | STATIC_CONTENT | Status |
 |---|---|---|---|---|---|---|---|
-| Fake (fixtures) | ✓ | ✓ | ✓ | — | ✓ | — | **Implemented.** Offline, deterministic, synthetic |
-| Henrik (third-party API) | planned | planned (provider-visible subset) | planned | — | planned | — | Skeleton. The server-side key lives in the local collector only, never a browser; the provider's rate budget applies; history is not complete |
-| Riot (official API + RSO) | planned (RSO) | planned (depth unknown) | planned | — | unknown | possible | Skeleton. Requires Riot production approval and RSO; ticket handling stays separate |
-| Overwolf (client app) | — | — | — | planned | — | — | Skeleton. Forward-only from a user-installed client; no back-fill |
-| Tracker / Blitz | — | — | — | — | — | — | Only as a future **partner / business** data agreement; no API assumed |
-| Manual / import archive | — | planned | planned | — | — | — | Owner-provided exports with explicit provenance (e.g. V2-DATA-IMPORT-01) |
+| Fake (fixtures) | IMPLEMENTED | IMPLEMENTED | IMPLEMENTED | IMPLEMENTED | — | — | Synthetic demo provider |
+| Henrik (third-party API) | IMPLEMENTED | IMPLEMENTED (provider-visible subset) | IMPLEMENTED | IMPLEMENTED | — | DOCUMENTED, unused | **IMPLEMENT_NOW**: operator key server-side only; ≤ 6 RPM / ≤ 2 lanes; budgeted |
+| Riot (official API + RSO) | DOCUMENTED (RSO) | DOCUMENTED (depth UNKNOWN) | DOCUMENTED | — (leaderboards only) | — | DOCUMENTED | **PREPARE**: contract-only adapter, 0 requests; needs production key + RSO; ticket #139243830 open, no response |
+| Overwolf (client app) | live only | — | live only | UNKNOWN | DOCUMENTED | — | **RESEARCH_ONLY**: forward-only, approved app + Riot compliance; FUTURE design interface only |
+| Tracker Network | — | — | — | — | — | — | **NOT_AVAILABLE** for VALORANT (staff: not permitted by Riot policy) |
+| Blitz | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | **NOT_AVAILABLE** (no public API found); partner UNKNOWN |
+| Manual / import archive | — | IMPLEMENTED | IMPLEMENTED | — | — | — | **IMPLEMENT_NOW**: `vsa-match-archive-v1`, private by default |
+| Future partner API | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | **PARTNER_ONLY** |
 
 ## Rules (non-negotiable)
 
@@ -19,18 +29,26 @@ analytics never sees provider types (enforced by `npm run check:architecture`).
 - No reverse engineering of private endpoints.
 - No browser credential extraction.
 - No anti-bot bypass.
-- No dependency on undocumented internal APIs.
+- No dependency on undocumented internal APIs (never as production architecture).
+- No hidden Tracker / Blitz APIs.
+- No Riot client-token extraction.
 - Provider keys live server-side in the local collector; players never provide provider credentials.
 - Every acquisition step is bounded: page size ≤ 20 and pages per account, request budgets and rate limits per
   adapter.
 
 ## Multiple sources
 
-- `ProviderRouter` picks a primary and falls back only when the provider is **unavailable**.
-- It never merges conflicting evidence: each canonical match keeps one `source` (provider, adapter version, normalizer
-  version, private record ref, observed time).
-- Combining sources for the same real match needs an explicit, versioned **reconciliation policy** (a future task).
-  Until then, duplicates are kept apart by `(provider, provider_record_ref)`.
+- **Routing.** `ProviderRouter` (`provider-router-v1`) routes by explicit capability, with a deterministic order.
+- **Fallback** happens only on network unavailable / timeout, provider temporarily unavailable or capability
+  unsupported, and only inside one record namespace.
+- **Conflicts** are `PROVIDER_CONFLICT`: the router never falls back or merges on one.
+- **One source per match.** Each canonical match keeps one `source` (ingestion-provenance-v1).
+- **Identity** (`logical-match-identity-v1`):
+  - exact evidence only: the same record, or an explicit recorded link;
+  - map plus approximate time is a CANDIDATE and is never merged;
+  - a Henrik id is never assumed to be a Riot id.
+- **Reconciliation.** Combining evidence from several sources for one real match still needs an explicit, versioned
+  reconciliation policy (a future task). Until then, records stay separate by `(provider namespace, record ref)`.
 
 ## History completeness
 

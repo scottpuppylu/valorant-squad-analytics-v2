@@ -13,16 +13,23 @@
 
 ## Provider abstraction
 
-- `DataProviderAdapter` (`providerId`, `providerVersion`, `capabilities()`, plus optional `resolveAccount`,
-  `listMatches`, `getMatch`, `getRankContext`) returns **canonical** contracts only.
-- Each adapter declares what it actually supports: IDENTITY, MATCH_HISTORY, MATCH_DETAIL, RANK, FORWARD_EVENTS or
-  STATIC_CONTENT. `requireCapability` fails with a typed error otherwise.
-- `ProviderRouter` orders primary → fallback providers. It falls back only on `ProviderUnavailableError` and never
-  merges evidence from several providers; each match keeps its own `source` provenance.
-- Implemented: `FakeProviderAdapter` (deterministic synthetic fixtures; its own payload shape is converted by its
-  normalizer).
-- Skeletons only: `HenrikAdapter`, `RiotAdapter`, `OverwolfAdapter`. They declare no capabilities and have no network
-  code or keys.
+- `DataProviderAdapter` (`providerId`, `providerVersion`, optional `recordNamespace`, `capabilities()`, plus optional
+  `resolveAccount`, `listMatches`, `getMatch`, `getRankContext`) returns **canonical** contracts only.
+- Capabilities (`provider-capabilities-v1`): IDENTITY, MATCH_HISTORY, MATCH_DETAIL, RANK, FORWARD_LIVE (formerly
+  FORWARD_EVENTS), STATIC_CONTENT. `requireCapability` fails with a typed error otherwise.
+- `ProviderRouter` (`provider-router-v1`):
+  - deterministic capability routing;
+  - fallback only on network / temporary unavailability or an unsupported capability, inside one record namespace;
+  - never on PROVIDER_CONFLICT;
+  - never merges.
+- **Implemented:**
+  - `HenrikAdapter`: documented endpoints, bounded transport, limiter ≤ 6 RPM / ≤ 2 lanes, request budget;
+  - `ImportFileAdapter`: `vsa-match-archive-v1`;
+  - `FakeProviderAdapter`: synthetic.
+- **Contract or design only:** `RiotAdapter` (no capability, no request) and `OverwolfAdapter` (FORWARD_LIVE declaration).
+- Provider-specific code lives behind `@vsa/source-adapters/{henrik,riot,overwolf,import}`, enforced by
+  `PROVIDER_TYPES_OUTSIDE_ADAPTERS`. See [PROVIDER_ARCHITECTURE.md](PROVIDER_ARCHITECTURE.md) and
+  [PROVIDER_MATRIX.md](PROVIDER_MATRIX.md).
 
 ## Canonical model (`canonical-schema-v2`)
 
@@ -53,7 +60,8 @@
 ## Versions
 
 - Contracts: `canonical-schema-v2`, `control-contract-v2`, `analytics-contract-v1`, `product-contract-v1`, `public-snapshot-v2`, `manifest-v1`.
-- Adapter versions are independent (e.g. `fake-provider-v2`, `fake-normalizer-v3`, `legacy-henrik-v4-import-v1`).
+- Adapter versions are independent (e.g. `fake-provider-v2`, `fake-normalizer-v3`, `henrik-adapter-v1`, `henrik-v4-normalizer-v1`,
+  `legacy-henrik-v4-import-v1`, `import-file-adapter-v1`).
 - Algorithms keep their identities. V2-PRODUCT-UI-WAVE-01 ported the accepted ones (`event-metrics-v1/-v2`,
   `community-score-v2`, `adaptive-window-v1`, `shared-match-rating-v1`, `team-composition-v1` (emitted as `team-composition-v1.1`, docs/TEAM_COMPOSITION_TIES.md) / `-v2`, `rank-context-v1`,
   `agent-catalog-v1`) into `packages/analytics` (basic/, agents/, event/, rank/, strength/, shared-match/,

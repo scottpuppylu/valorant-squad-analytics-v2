@@ -77,7 +77,7 @@ apps/web            static React client (manifest + snapshot JSON only)
 apps/collector      local pipeline / CLI: ingest → analytics → export → publish
 apps/control-api    control-plane skeleton (metadata only; in-memory reference)
 packages/contracts  versioned Zod contracts (control, canonical, analysis, team-composition, public)
-packages/source-adapters  DataProviderAdapter, ProviderRouter, FakeProviderAdapter, future-provider skeletons
+packages/source-adapters  capability adapters (Henrik, import archive, fake; Riot / Overwolf contract-only), router, transport
 packages/canonical-data   SQL boundary (pg / PGlite), migrations, canonical repository — the only SQL
 packages/analytics  accepted algorithms over canonical contracts only
 packages/exporter   allowlisted public documents + content-derived snapshot id

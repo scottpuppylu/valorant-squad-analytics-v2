@@ -1,5 +1,5 @@
 import type { CanonicalRepository } from '@vsa/canonical-data';
-import { MAX_MATCH_PAGE_SIZE, requireCapability, supports, type DataProviderAdapter, type IdentityResolver } from '@vsa/source-adapters';
+import { MAX_MATCH_PAGE_SIZE, recordNamespaceOf, requireCapability, supports, type DataProviderAdapter, type IdentityResolver } from '@vsa/source-adapters';
 
 export interface IngestSummary {
   providerId: string;
@@ -31,7 +31,9 @@ export class IngestService {
     const listMatches = requireCapability(this.adapter, 'MATCH_HISTORY', 'listMatches');
     const getMatch = requireCapability(this.adapter, 'MATCH_DETAIL', 'getMatch');
     const consent = new Map((await this.repository.listConsents(groupId)).map((c) => [c.memberId, c]));
-    const accounts = (await this.repository.listSourceAccounts(groupId)).filter((a) => a.providerId === this.adapter.providerId);
+    // Account / match refs are scoped by the adapter's record namespace (e.g. a henrik-v4 archive shares Henrik refs).
+    const namespace = recordNamespaceOf(this.adapter);
+    const accounts = (await this.repository.listSourceAccounts(groupId)).filter((a) => a.providerId === namespace);
     const collecting = accounts.filter((a) => consent.get(a.memberId)?.dataCollectionAllowed === true);
     const identity = new Map(collecting.map((a) => [a.providerAccountRef, { memberId: a.memberId, accountId: a.accountId }]));
     const resolveIdentity: IdentityResolver = (ref) => identity.get(ref) ?? null;
@@ -47,7 +49,7 @@ export class IngestService {
         for (const matchRef of result.matchRefs) {
           seen += 1;
           summary.matchesListed += 1;
-          if (await this.repository.hasMatch(this.adapter.providerId, matchRef)) { summary.matchesAlreadyStored += 1; continue; }
+          if (await this.repository.hasMatch(namespace, matchRef)) { summary.matchesAlreadyStored += 1; continue; }
           await this.repository.saveMatch(await getMatch({ matchRef, resolveIdentity, observedAt: this.now() }));
           summary.matchesStored += 1;
         }

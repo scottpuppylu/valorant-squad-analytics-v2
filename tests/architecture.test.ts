@@ -34,8 +34,18 @@ describe('architecture checker detects violations (self-test)', () => {
     ['packages/exporter', `import { x } from '../../privacy/src/index.ts';`, 'CROSS_WORKSPACE_RELATIVE_IMPORTS'],
     ['packages/canonical-data', `import { normalizeHenrikV4Match } from '@vsa/legacy-importer';`, 'LEGACY_IMPORTER_IN_CORE_IMPORTS'],
     ['apps/collector', `import { LegacyEvidenceImportAdapter } from '@vsa/legacy-importer';`, 'LEGACY_IMPORTER_IN_CORE_IMPORTS'],
+    ['apps/collector', `import { HenrikAdapter } from '@vsa/source-adapters/henrik';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
+    ['packages/exporter', `import { RiotAdapter } from '@vsa/source-adapters/riot';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
+    ['packages/analytics', `import type { X } from '@vsa/source-adapters/import';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
+    ['apps/legacy-importer', `import { RiotAdapter } from '@vsa/source-adapters/riot';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
+    ['apps/collector', `const base = 'https://api.henrikdev.xyz/valorant';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
   ])('%s: %s → %s', (workspace, source, rule) => {
     expect(one(workspace, source).counts[rule]).toBe(1);
+  });
+
+  it('the one-way legacy importer may use the shared Henrik v4 normalizer; source-adapters may use its own subpaths', () => {
+    expect(one('apps/legacy-importer', `export { normalizeHenrikV4Match } from '@vsa/source-adapters/henrik';`).counts.PROVIDER_TYPES_OUTSIDE_ADAPTERS).toBe(0);
+    expect(one('packages/source-adapters', `import { HenrikAdapter } from '@vsa/source-adapters/henrik';`).counts.PROVIDER_TYPES_OUTSIDE_ADAPTERS).toBe(0);
   });
 
   it('flags workspace imports that are not declared dependencies', () => {

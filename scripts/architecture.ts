@@ -14,7 +14,7 @@ export const RULES = [
   'ANALYTICS_PROVIDER_SPECIFIC_IMPORTS', 'ANALYTICS_DB_IMPORTS',
   'CONTROL_PLANE_CANONICAL_TELEMETRY_IMPORTS',
   'BROWSER_UNSAFE_IMPORTS', 'CROSS_WORKSPACE_RELATIVE_IMPORTS', 'UNDECLARED_WORKSPACE_DEPENDENCIES',
-  'LEGACY_IMPORTER_IN_CORE_IMPORTS',
+  'LEGACY_IMPORTER_IN_CORE_IMPORTS', 'PROVIDER_TYPES_OUTSIDE_ADAPTERS',
 ] as const;
 
 const stripComments = (source: string) => source.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/(^|[^:'"`])\/\/.*$/gmu, '$1');
@@ -33,13 +33,24 @@ const WEB_ALLOWED = [/^react$/u, /^react\/jsx-runtime$/u, /^react-dom$/u, /^reac
 const ANALYTICS_ALLOWED = [/^@vsa\/contracts\/(canonical|analysis|common|versions|team-composition|product)$/u, /^\.\.?\//u];
 const CONTROL_FORBIDDEN = (s: string) => isDb(s) || s.startsWith('@vsa/analytics') || s.startsWith('@vsa/source-adapters') || s.startsWith('@vsa/collector')
   || s === '@vsa/contracts' || s === '@vsa/contracts/canonical' || s === '@vsa/contracts/analysis';
+/**
+ * Provider-specific adapter code (`@vsa/source-adapters/<provider>`) and provider endpoints stay inside
+ * packages/source-adapters. The only exception is the one-way legacy importer, which uses the shared Henrik v4
+ * normalizer. (`/fake` is the synthetic demo provider and is governed by the WEB / ANALYTICS rules.)
+ */
+const PROVIDER_SUBPATH = /^@vsa\/source-adapters\/(henrik|riot|overwolf|import)(\/|$)/u;
+const PROVIDER_ENDPOINT = /henrikdev\.xyz|api\.riotgames\.com|\.api\.riotgames\.com|tracker\.gg\/api|overwolf\.games/iu;
+const providerSubpathAllowed = (workspace: string, specifier: string) => workspace === 'packages/source-adapters'
+  || (workspace === 'apps/legacy-importer' && specifier === '@vsa/source-adapters/henrik');
 const BROWSER_SAFE_WORKSPACES = new Set(['packages/contracts', 'packages/privacy', 'apps/web']);
 
 export function analyzeFiles(files: readonly SourceFile[], declaredDependencies: ReadonlyMap<string, ReadonlySet<string>> = new Map()): ArchitectureReport {
   const violations: Violation[] = [];
   const add = (rule: string, f: SourceFile, specifier: string) => violations.push({ rule, workspace: f.workspace, file: f.path, specifier });
   for (const f of files) {
+    if (f.workspace !== 'packages/source-adapters' && PROVIDER_ENDPOINT.test(stripComments(f.source))) add('PROVIDER_TYPES_OUTSIDE_ADAPTERS', f, '<provider endpoint literal>');
     for (const s of importSpecifiers(f.source)) {
+      if (PROVIDER_SUBPATH.test(s) && !providerSubpathAllowed(f.workspace, s)) add('PROVIDER_TYPES_OUTSIDE_ADAPTERS', f, s);
       if (f.workspace === 'apps/web') {
         if (isDb(s)) add('WEB_DB_IMPORTS', f, s);
         else if (isProviderSpecific(s)) add('WEB_PROVIDER_IMPORTS', f, s);

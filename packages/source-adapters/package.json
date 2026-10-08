@@ -6,12 +6,17 @@
   "description": "Provider adapters: provider payloads are converted to canonical contracts here and nowhere else.",
   "exports": {
     ".": "./src/index.ts",
-    "./fake": "./src/fake/index.ts"
+    "./fake": "./src/fake/index.ts",
+    "./henrik": "./src/henrik/index.ts",
+    "./riot": "./src/riot/index.ts",
+    "./overwolf": "./src/overwolf/index.ts",
+    "./import": "./src/import/index.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@vsa/contracts": "*"
+    "@vsa/contracts": "*",
+    "zod": "^4.1.0"
   }
 }
