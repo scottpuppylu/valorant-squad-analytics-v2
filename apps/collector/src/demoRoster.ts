@@ -16,10 +16,10 @@ export const DEMO_MEMBERS: GroupMember[] = NAMES.map((name) => ({
 
 export const DEMO_SOURCE_ACCOUNTS: SourceAccount[] = NAMES.map((name, i) => ({
   accountId: `account-${name.toLowerCase()}`, memberId: `member-${name.toLowerCase()}`, providerId: 'fake',
-  providerAccountRef: FAKE_ACCOUNTS[i]!.fakePuuid, linkedAt: T0,
+  providerAccountRef: FAKE_ACCOUNTS[i]!.fakePuuid, isPrimary: true, linkedAt: T0,
 }));
 
 export const DEMO_CONSENTS: ConsentState[] = NAMES.map((name) => ({
-  memberId: `member-${name.toLowerCase()}`, identityConnected: true, dataCollectionAllowed: true, groupVisibilityAllowed: true,
+  memberId: `member-${name.toLowerCase()}`, status: 'explicit', source: 'demo-fixture', identityConnected: true, dataCollectionAllowed: true, groupVisibilityAllowed: true,
   publicDerivedAnalyticsAllowed: name !== 'Pike', policyVersion: 'demo-consent-v1', updatedAt: T0,
 }));

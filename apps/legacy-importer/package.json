@@ -1,0 +1,20 @@
+{
+  "name": "@vsa/legacy-importer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "LegacyEvidenceImportAdapter: READ-ONLY legacy private staging → V2 canonical store. Never imported by core packages.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@vsa/analytics": "*",
+    "@vsa/canonical-data": "*",
+    "@vsa/contracts": "*",
+    "@vsa/source-adapters": "*",
+    "zod": "^4.1.0"
+  }
+}

@@ -21,7 +21,7 @@ export interface ListMatchesResult { matchRefs: string[]; nextCursor: string | n
 export type IdentityResolver = (providerAccountRef: string) => { memberId: string; accountId: string } | null;
 
 export interface GetMatchInput { matchRef: string; resolveIdentity: IdentityResolver; observedAt: string }
-export interface RankContextInput { providerAccountRef: string; memberId: string; observedAt: string }
+export interface RankContextInput { providerAccountRef: string; memberId: string; accountId: string; observedAt: string }
 
 export interface DataProviderAdapter {
   readonly providerId: string;

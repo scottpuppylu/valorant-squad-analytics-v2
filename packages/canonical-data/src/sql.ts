@@ -13,8 +13,10 @@ export interface SqlClient extends SqlExecutor {
 }
 
 /** Real PostgreSQL (local PostgreSQL 18) via `pg`. The connection string is never logged. */
-export function createPostgresClient(connectionString: string): SqlClient {
-  const pool = new pg.Pool({ connectionString, max: 4 });
+export function createPostgresClient(connectionString: string, options: { readOnly?: boolean; applicationName?: string } = {}): SqlClient {
+  // readOnly: every session starts with default_transaction_read_only=on, so PostgreSQL itself rejects any write.
+  const pool = new pg.Pool({ connectionString, max: 4, ...(options.readOnly ? { options: '-c default_transaction_read_only=on' } : {}),
+    ...(options.applicationName ? { application_name: options.applicationName } : {}) });
   return {
     kind: 'postgresql',
     async query(sql, params = []) {

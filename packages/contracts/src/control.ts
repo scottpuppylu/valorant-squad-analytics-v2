@@ -24,12 +24,16 @@ export const GroupMember = z.object({
 }).strict();
 export type GroupMember = z.infer<typeof GroupMember>;
 
-/** A provider account linked to a member. `providerAccountRef` is PRIVATE (e.g. a provider's account id). */
+/**
+ * A provider account linked to a member. `providerAccountRef` is PRIVATE (e.g. a provider's account id).
+ * A member may have several accounts; at most one is primary.
+ */
 export const SourceAccount = z.object({
   accountId: InternalId,
   memberId: InternalId,
   providerId: z.string().min(1).max(40),
   providerAccountRef: z.string().min(1).max(200),
+  isPrimary: z.boolean(),
   linkedAt: IsoInstant,
 }).strict();
 export type SourceAccount = z.infer<typeof SourceAccount>;
@@ -40,16 +44,28 @@ export type SourceAccount = z.infer<typeof SourceAccount>;
  *  dataCollectionAllowed        — the collector may fetch and store their match evidence locally
  *  groupVisibilityAllowed       — group members may see their derived analytics
  *  publicDerivedAnalyticsAllowed — derived (never raw) analytics may appear in a published snapshot
+ *
+ * `status`:
+ *  explicit                 — the grants were given explicitly by the member (control plane / demo fixture)
+ *  requires-reconciliation  — consent is NOT known (e.g. imported legacy evidence). Every grant is false (deny by
+ *                             default) until reconciled; evidence presence is never consent.
  */
+export const ConsentStatus = z.enum(['explicit', 'requires-reconciliation']);
 export const ConsentState = z.object({
   memberId: InternalId,
+  status: ConsentStatus,
+  source: z.string().min(1).max(60),
   identityConnected: z.boolean(),
   dataCollectionAllowed: z.boolean(),
   groupVisibilityAllowed: z.boolean(),
   publicDerivedAnalyticsAllowed: z.boolean(),
   policyVersion: z.string().min(1).max(40),
   updatedAt: IsoInstant,
-}).strict();
+}).strict().superRefine((c, ctx) => {
+  if (c.status === 'requires-reconciliation' && (c.identityConnected || c.dataCollectionAllowed || c.groupVisibilityAllowed || c.publicDerivedAnalyticsAllowed)) {
+    ctx.addIssue({ code: 'custom', message: 'unreconciled consent grants nothing' });
+  }
+});
 export type ConsentState = z.infer<typeof ConsentState>;
 
 export const Invite = z.object({

@@ -11,7 +11,8 @@ const PRIVATE_KEYS = new Set([
   'participantid', 'rawparticipantid', 'participantkey', 'accountid', 'memberid',
   'accesstoken', 'refreshtoken', 'idtoken', 'apikey', 'providersecret', 'clientsecret', 'secret', 'password',
   'databaseurl', 'connectionstring', 'dsn',
-  'locationx', 'locationy', 'viewradians', 'spatial', 'position', 'coordinates', 'x', 'y',
+  'locationx', 'locationy', 'viewradians', 'spatial', 'position', 'coordinates', 'x', 'y', 'location', 'playersnapshots', 'plantlocation',
+  'defuselocation', 'seasonref',
 ]);
 /** Substrings that make any key private (normalized). */
 const PRIVATE_KEY_FRAGMENTS = ['puuid', 'token', 'secret', 'password', 'apikey', 'hmac', 'databaseurl'];

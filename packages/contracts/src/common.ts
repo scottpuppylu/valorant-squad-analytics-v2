@@ -13,7 +13,18 @@ export const PublicGroupId = z.string().regex(/^g_[0-9a-f]{16}$/u, 'public group
 export const HistoryCompleteness = z.enum(['unknown', 'provider-visible']);
 export type HistoryCompleteness = z.infer<typeof HistoryCompleteness>;
 
-export const GameMode = z.enum(['competitive', 'unrated', 'other', 'unknown']);
+/**
+ * Normalized game mode. Canonical EVIDENCE keeps every mode (the provider's own queue label is kept separately);
+ * analytics eligibility (e.g. Competitive only) is a separate, later decision — never a storage filter.
+ */
+export const GameMode = z.enum([
+  'competitive', 'unrated', 'premier', 'swiftplay', 'spike-rush', 'deathmatch', 'team-deathmatch', 'escalation', 'replication',
+  'snowball', 'custom', 'other', 'unknown',
+]);
 export type GameMode = z.infer<typeof GameMode>;
+
+/** Evidence availability: observed, absent from the source (missing) or present but unusable (unavailable). */
+export const EvidenceStatus = z.enum(['observed', 'missing', 'unavailable']);
+export type EvidenceStatus = z.infer<typeof EvidenceStatus>;
 
 export const NonNegativeInt = z.number().int().nonnegative();

@@ -55,7 +55,7 @@ export class IngestService {
         if (cursor === null || seen >= maxMatches) break;
       }
       if (supports(this.adapter, 'RANK')) {
-        const contexts = await requireCapability(this.adapter, 'RANK', 'getRankContext')({ providerAccountRef: account.providerAccountRef, memberId: account.memberId, observedAt: this.now() });
+        const contexts = await requireCapability(this.adapter, 'RANK', 'getRankContext')({ providerAccountRef: account.providerAccountRef, memberId: account.memberId, accountId: account.accountId, observedAt: this.now() });
         await this.repository.saveRankContext(contexts);
         summary.rankContexts += contexts.length;
       }

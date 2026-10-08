@@ -17,7 +17,8 @@ describe('fake payload → canonical normalization', () => {
   it('produces a valid canonical match with explicit versions and provenance', () => {
     expect(CanonicalMatch.parse(match)).toEqual(match);
     expect(match.schemaVersion).toBe(CANONICAL_SCHEMA_VERSION);
-    expect(match.source).toEqual({ providerId: 'fake', providerVersion: 'fake-provider-v1', normalizerVersion: 'fake-normalizer-v1', providerRecordRef: payload.fakeMatchId, observedAt: OBSERVED_AT });
+    expect(match.source).toEqual({ providerId: 'fake', providerVersion: 'fake-provider-v1', normalizerVersion: 'fake-normalizer-v2', providerRecordRef: payload.fakeMatchId, observedAt: OBSERVED_AT,
+      acquisition: 'provider-adapter', acquisitionSource: 'fake-provider' });
     expect(match.evidence.historyCompleteness).toBe('provider-visible');
   });
 
@@ -25,7 +26,7 @@ describe('fake payload → canonical normalization', () => {
     expect(match.matchKey).toBe(canonicalMatchKey('fake', payload.fakeMatchId));
     expect(match.matchKey).not.toContain(payload.fakeMatchId);
     const keys = keysOf(match);
-    for (const providerField of ['fakePuuid', 'fakeMatchId', 'killLog', 'roundResults', 'victimPos', 'px', 'py', 'facing', 'dmg', 'queue', 'side']) expect(keys.has(providerField)).toBe(false);
+    for (const providerField of ['fakePuuid', 'fakeMatchId', 'killLog', 'roundResults', 'victimPos', 'px', 'py', 'facing', 'dmg', 'side']) expect(keys.has(providerField)).toBe(false);
     expect(match.teams.map((t) => t.teamKey)).toEqual(['team-1', 'team-2']);
   });
 
@@ -39,13 +40,13 @@ describe('fake payload → canonical normalization', () => {
 
   it('keeps raw spatial evidence only in the private canonical event', () => {
     expect(match.events.length).toBeGreaterThan(0);
-    expect(match.events.every((e) => e.spatial !== null && Number.isFinite(e.spatial.locationX))).toBe(true);
+    expect(match.events.every((e) => e.location !== null && Number.isFinite(e.location.x) && e.playerSnapshots.length === 1)).toBe(true);
   });
 
   it('maps modes and preserves damage-evidence completeness', () => {
     expect(normalizeFakeMatch(FAKE_MATCHES[4]!, demoResolver, OBSERVED_AT).mode).toBe('unrated');
     const noDamage = normalizeFakeMatch(FAKE_MATCHES[9]!, demoResolver, OBSERVED_AT);
-    expect(noDamage.evidence).toMatchObject({ hasDamage: false, evidenceQuality: 'partial' });
+    expect(noDamage.evidence).toMatchObject({ hasDamage: false, evidenceQuality: 'partial', rounds: 'observed', kills: 'observed' });
     expect(noDamage.participants.every((p) => p.stats.damageDealt === null)).toBe(true);
   });
 

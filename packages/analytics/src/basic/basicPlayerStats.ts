@@ -1,24 +1,32 @@
 import { AnalysisResult, type PlayerAnalysisResult } from '@vsa/contracts/analysis';
-import { ANALYTICS_CONTRACT_VERSION } from '@vsa/contracts/versions';
 import type { CanonicalMatch, CanonicalParticipant } from '@vsa/contracts/canonical';
 import type { GameMode, HistoryCompleteness } from '@vsa/contracts/common';
+import { ANALYTICS_CONTRACT_VERSION } from '@vsa/contracts/versions';
 import { safeDivide } from './number.ts';
 
 /**
  * `basic-player-stats-v1` — the accepted basic aggregation, ported from legacy `aggregatePlayerStats`
- * (`src/utils/aggregateStats.ts`, release 1a4c790) onto canonical contracts. No new formula:
- *  rounds  = rounds of the match (sum of both teams' rounds won)
+ * (`src/utils/aggregateStats.ts`, release 1a4c790) onto canonical contracts:
+ *  rounds  = the member team's rounds won + lost (legacy scoreFor + scoreAgainst); fallback: recorded rounds
  *  kd      = kills / deaths, undefined (null) when deaths = 0
- *  adr     = round-weighted average damage per round = Σ damage / Σ rounds over matches WITH damage evidence
+ *  adr     = Σ damage / Σ rounds over matches WITH damage evidence, ONE denominator (team rounds) throughout.
+ *            Legacy divided each match by its RECORDED rounds but weighted by score rounds; the two agree except when a
+ *            match records more rounds than its score (6 of 345 accepted Competitive matches) — see docs/V2_DATA_IMPORT.md.
  *  wins / losses from the participant team's result (draws count as neither)
+ * Only OBSERVED participant statistics count; a match without stats evidence is withheld (never zero-filled).
  * Scope: Competitive only — the accepted mode-eligibility policy for "how well does this person play" metrics.
  */
 export const BASIC_PLAYER_STATS_ALGORITHM = 'basic-player-stats-v1' as const;
 export const BASIC_PLAYER_STATS_DESCRIPTION = 'Matches, wins, losses, kills, deaths, assists, K/D and ADR over Competitive matches.';
 
-const roundsOf = (match: CanonicalMatch) => match.teams.reduce((total, team) => total + team.roundsWon, 0);
+/** Rounds of the match from the participant's team perspective (see header). */
+export function roundsPlayed(match: CanonicalMatch, teamKey: string): number {
+  const team = match.teams.find((t) => t.teamKey === teamKey);
+  if (team && team.roundsWon !== null && team.roundsLost !== null) return team.roundsWon + team.roundsLost;
+  return match.rounds.length;
+}
 
-interface Entry { match: CanonicalMatch; participant: CanonicalParticipant }
+interface Entry { match: CanonicalMatch; participant: CanonicalParticipant; kills: number; deaths: number; assists: number; rounds: number }
 
 export function computeBasicPlayerStats(matches: readonly CanonicalMatch[], memberIds: readonly string[], options: { mode?: GameMode } = {}): AnalysisResult {
   const mode = options.mode ?? 'competitive';
@@ -28,21 +36,26 @@ export function computeBasicPlayerStats(matches: readonly CanonicalMatch[], memb
     const reasons: string[] = [];
     const entries: Entry[] = [];
     let collisions = 0;
+    let withoutStats = 0;
     for (const match of eligible) {
       const mine = match.participants.filter((p) => p.memberId === memberId);
       if (mine.length > 1) { collisions += 1; continue; } // a member twice in one match is withheld, never summed
-      if (mine[0]) entries.push({ match, participant: mine[0] });
+      const p = mine[0];
+      if (!p) continue;
+      if (p.stats.status !== 'observed' || p.stats.kills === null || p.stats.deaths === null || p.stats.assists === null) { withoutStats += 1; continue; }
+      entries.push({ match, participant: p, kills: p.stats.kills, deaths: p.stats.deaths, assists: p.stats.assists, rounds: roundsPlayed(match, p.teamKey) });
     }
     if (collisions > 0) reasons.push(`${collisions} match(es) withheld: member appears more than once`);
-    const rounds = entries.reduce((total, { match }) => total + roundsOf(match), 0);
-    const kills = entries.reduce((total, { participant }) => total + participant.stats.kills, 0);
-    const deaths = entries.reduce((total, { participant }) => total + participant.stats.deaths, 0);
-    const assists = entries.reduce((total, { participant }) => total + participant.stats.assists, 0);
+    if (withoutStats > 0) reasons.push(`${withoutStats} match(es) withheld: no observed statistics`);
+    const rounds = entries.reduce((total, e) => total + e.rounds, 0);
+    const kills = entries.reduce((total, e) => total + e.kills, 0);
+    const deaths = entries.reduce((total, e) => total + e.deaths, 0);
+    const assists = entries.reduce((total, e) => total + e.assists, 0);
     const teamResult = ({ match, participant }: Entry) => match.teams.find((t) => t.teamKey === participant.teamKey)?.won ?? null;
     const withDamage = entries.filter(({ participant }) => participant.stats.damageDealt !== null);
-    const damageRounds = withDamage.reduce((total, { match }) => total + roundsOf(match), 0);
+    const damageRounds = withDamage.reduce((total, e) => total + e.rounds, 0);
     const damage = withDamage.reduce((total, { participant }) => total + participant.stats.damageDealt!, 0);
-    if (entries.length === 0) reasons.push(`no ${mode} matches`);
+    if (entries.length === 0 && collisions === 0 && withoutStats === 0) reasons.push(`no ${mode} matches`);
     return {
       memberId,
       algorithmId: BASIC_PLAYER_STATS_ALGORITHM,

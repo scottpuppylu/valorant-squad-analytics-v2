@@ -24,18 +24,18 @@
 | 3 | `server/metrics/roundTopology.ts` | PURE_REUSABLE | Only local types | Port with event-metrics-v2 onto `CanonicalEvent` |
 | 4 | `src/analytics/rank/tiers.ts`, `rankContext.ts` | PURE_REUSABLE | No external imports | Port as `analytics/rank`; rank stays context, never a weight |
 | 5 | `src/analytics/teamComposition/siteReference.ts` | PURE_REUSABLE | No imports | Port with team-composition-v2 (private, raw space) |
-| 6 | `src/utils/aggregateStats.ts` | REQUIRES_ADAPTATION | Accepted basic aggregation on legacy `MatchRecord` | **Formula ported** (K/D null at 0 deaths; round-weighted ADR) as `basic-player-stats-v1` on `CanonicalMatch` |
+| 6 | `src/utils/aggregateStats.ts` | REQUIRES_ADAPTATION | Accepted basic aggregation on legacy `MatchRecord` | **Formula ported** (K/D null at 0 deaths; ADR = Σ damage ÷ Σ team rounds) as `basic-player-stats-v1` on `CanonicalMatch`. Legacy divided by recorded rounds per match; differs in 6 of 345 Competitive matches (EXPECTED, see `docs/V2_DATA_IMPORT.md`) |
 | 7 | `server/db/migrations.ts` | REQUIRES_ADAPTATION | Generic runner, legacy `SqlDatabase` type | **Ported and adapted** → `packages/canonical-data/src/migrations.ts` |
 | 8 | `server/metrics/eventMetricEngine.ts`, `eventMetricsV2.ts` | REQUIRES_ADAPTATION | Accepted `event-metrics-v2`; inputs are legacy evidence types | Port onto canonical rounds/events; keep the algorithm id; replay the legacy fixtures |
 | 9 | `src/analytics/analysisCore.ts` | REQUIRES_ADAPTATION | Shared analysis core, tied to legacy contracts and the scope engine | Re-express scopes over canonical matches; keep the static-parity idea as a test |
-| 10 | `src/utils/agentRoles.ts` | REQUIRES_ADAPTATION | `agent-catalog-v1` data is pure; imports legacy types | Port as static content (stable id first); keep `AGENT_ROLES_CATALOG_V0` frozen |
+| 10 | `src/utils/agentRoles.ts` | REQUIRES_ADAPTATION | `agent-catalog-v1` data is pure; imports legacy types | **`agent-catalog-v1` ported** (V2-DATA-IMPORT-01) → `packages/analytics/src/agents/agentCatalog.ts`; id first, unknown fails closed. `AGENT_ROLES_CATALOG_V0` is ported later with shared-match-rating-v1 |
 | 11 | `src/analytics/sharedMatch/rating.ts`, `pairEvidence.ts` | REQUIRES_ADAPTATION | `shared-match-rating-v1` depends on legacy scoring, catalog V0 and event-metrics-v1 | Port with its frozen inputs; must reproduce the accepted baseline exactly |
 | 12 | `src/analytics/teamComposition/{recommend,fit,responsibility,v2,sideEvidence}.ts` | REQUIRES_ADAPTATION | `team-composition-v1/-v2` over legacy observation types | Port onto canonical contracts → `TeamCompositionResult`; keep the `V2_VALIDATION` gate |
 | 13 | `src/analytics/weapons/weaponQuery.ts` (+ engine) | REQUIRES_ADAPTATION | Pure query over legacy facts | Port onto canonical kill events |
 | 14 | `src/scoring/calculateScores.ts` (community-score-v2) | REQUIRES_ADAPTATION | Accepted scoring; legacy types | Port later with its benchmarks; no redesign |
 | 15 | `server/staticExport/publicAllowlist.ts` | REQUIRES_ADAPTATION | The allowlist concept is accepted; paths are legacy | **Concept re-implemented** as `@vsa/privacy` (explicit field-tree allowlist; nothing copied) |
 | 16 | `server/staticExport/publisher.ts` | REQUIRES_ADAPTATION | Manifest-last publication concept | **Concept re-implemented** as `LocalFilesystemPublisher` (`manifest-v1`, content-derived ids; nothing copied except #2) |
-| 17 | `server/normalizeHenrik.ts`, `server/evidence/positionEvidence.ts` | REQUIRES_ADAPTATION | Henrik-specific normalization (incl. the nested `player_locations` fix) | Move into a future `HenrikAdapter` normalizer → canonical; never import outside the adapter |
+| 17 | `server/normalizeHenrik.ts`, `server/evidence/positionEvidence.ts` | REQUIRES_ADAPTATION | Henrik-specific normalization (incl. the nested `player_locations` fix) | **Ported for import only** (V2-DATA-IMPORT-01) → `apps/legacy-importer/src/henrikV4.ts` (`legacy-henrik-v4-import-v1`). The live `HenrikAdapter` stays future; core packages never import the importer |
 | 18 | `server/dataset/weaponAnalytics.ts` | LEGACY_RUNTIME_COUPLED | SQL plus legacy services | Do not copy; rebuild on the canonical read repository |
 | 19 | `src/dataSources/static/StaticQueryEngine.ts` | LEGACY_RUNTIME_COUPLED | Imports server contracts and the legacy public-facts model | Not ported; the V2 web reads precomputed snapshots |
 | 20 | `server/staticExport/exporter.ts` | LEGACY_RUNTIME_COUPLED | DB snapshot plus `fs`, legacy contracts | Replaced by `@vsa/exporter` |
@@ -45,7 +45,7 @@
 | 24 | `server/repositories/postgres.ts` | LEGACY_RUNTIME_COUPLED | Legacy schema, Henrik evidence and consent policy | Replaced by `PostgresCanonicalRepository` |
 | 25 | Internal-strength candidates / holdout, shared-match v2 candidate audit, team-composition holdout / observations evaluation, `scripts/*` research tools | RESEARCH_ONLY | Produced the accepted decisions | Keep in legacy; re-run there if evidence must be reproduced |
 | 26 | `api/**` (Vercel handlers), `vercel.json`, `scripts/migrate-vercel.ts`, `scripts/hydrate-analysis-facts-vercel.ts` | DO_NOT_PORT | Vercel database-backed runtime (retired direction) | — |
-| 27 | `server/rebuildStaging/**`, `scripts/rebuild-collect.ts`, `scripts/bulk-history.ts` | DO_NOT_PORT | Private staging and acquisition tooling | — (data import is V2-DATA-IMPORT-01) |
+| 27 | `server/rebuildStaging/**`, `scripts/rebuild-collect.ts`, `scripts/bulk-history.ts` | DO_NOT_PORT | Private staging and acquisition tooling | — (data is imported read-only by `apps/legacy-importer`, V2-DATA-IMPORT-01) |
 | 28 | Legacy migrations `0001`–`0012` | DO_NOT_PORT | Different schema; V2 starts a fresh `0001` | — |
 | 29 | `infra/` (VPS compose, Caddy, backup scripts) | DO_NOT_PORT | Superseded topology | V2 `infra/local` only |
 | 30 | Anything from commit `31d0210` (the vendored third-party Neon skill) | DO_NOT_PORT | Third-party tooling, not product code | — |

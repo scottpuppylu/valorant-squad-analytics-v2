@@ -55,6 +55,7 @@ Optional local PostgreSQL 18 (localhost only): copy `infra/local/.env.example` t
 | `npm run check:privacy` | Regenerates the demo snapshot, builds the web app, then scans public data and the bundle for private data |
 | `npm run snapshot:demo` / `npm run web:dev` | Offline demo snapshot / Vite dev server |
 | `VSA_PG18_URL=… npm test` | Also runs the opt-in real PostgreSQL 18 integration test (use a disposable database) |
+| `npm run import:legacy -- [--dry-run] [--resume]` | Read-only import of the accepted legacy private staging into a local `valorant_analytics_v2*` database ([docs/V2_DATA_IMPORT.md](docs/V2_DATA_IMPORT.md)) |
 
 Node 24 runs the TypeScript sources directly (type stripping, `erasableSyntaxOnly`). A workspace's `build` is a strict
 compile; only the web app emits a bundle.

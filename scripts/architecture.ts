@@ -14,6 +14,7 @@ export const RULES = [
   'ANALYTICS_PROVIDER_SPECIFIC_IMPORTS', 'ANALYTICS_DB_IMPORTS',
   'CONTROL_PLANE_CANONICAL_TELEMETRY_IMPORTS',
   'BROWSER_UNSAFE_IMPORTS', 'CROSS_WORKSPACE_RELATIVE_IMPORTS', 'UNDECLARED_WORKSPACE_DEPENDENCIES',
+  'LEGACY_IMPORTER_IN_CORE_IMPORTS',
 ] as const;
 
 const stripComments = (source: string) => source.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/(^|[^:'"`])\/\/.*$/gmu, '$1');
@@ -49,6 +50,8 @@ export function analyzeFiles(files: readonly SourceFile[], declaredDependencies:
         else if (isDb(s)) add('ANALYTICS_DB_IMPORTS', f, s);
         else if (!ANALYTICS_ALLOWED.some((rx) => rx.test(s))) add('ANALYTICS_PROVIDER_SPECIFIC_IMPORTS', f, s);
       }
+      // The legacy import adapter is a one-way, optional edge: no core package or app may depend on it.
+      if (f.workspace !== 'apps/legacy-importer' && s.startsWith('@vsa/legacy-importer')) add('LEGACY_IMPORTER_IN_CORE_IMPORTS', f, s);
       if (f.workspace === 'apps/control-api' && CONTROL_FORBIDDEN(s)) add('CONTROL_PLANE_CANONICAL_TELEMETRY_IMPORTS', f, s);
       if (BROWSER_SAFE_WORKSPACES.has(f.workspace) && (s.startsWith('node:') || ['fs', 'path', 'crypto', 'child_process', 'os'].includes(s))) add('BROWSER_UNSAFE_IMPORTS', f, s);
       if (s.startsWith('.')) {

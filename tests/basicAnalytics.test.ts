@@ -12,14 +12,17 @@ function mk(opts: { mode?: GameMode; won?: boolean | null; rounds?: [number, num
   const [r1, r2] = opts.rounds ?? [13, 7];
   const won = opts.won === undefined ? r1 > r2 : opts.won;
   return {
-    schemaVersion: 'canonical-schema-v1', matchKey: `cm_${seq.toString(16).padStart(24, '0')}`,
-    source: { providerId: 'test', providerVersion: 'test-v1', normalizerVersion: 'test-n1', providerRecordRef: `r${seq}`, observedAt: OBSERVED_AT },
-    evidence: { historyCompleteness: 'provider-visible', evidenceQuality: 'basic', hasRounds: false, hasEvents: false, hasDamage: opts.players.every((p) => p.dmg !== null) },
-    mapId: 'map-a', mapName: 'A', mode: opts.mode ?? 'competitive', startedAt: new Date(Date.UTC(2026, 0, 1) + seq * 3_600_000).toISOString(), durationSeconds: null,
-    teams: [{ teamKey: 'team-1', roundsWon: r1, won }, { teamKey: 'team-2', roundsWon: r2, won: won === null ? null : !won }],
+    schemaVersion: 'canonical-schema-v2', matchKey: `cm_${seq.toString(16).padStart(24, '0')}`,
+    source: { providerId: 'test', providerVersion: 'test-v1', normalizerVersion: 'test-n1', providerRecordRef: `r${seq}`, observedAt: OBSERVED_AT, acquisition: 'provider-adapter', acquisitionSource: 'test' },
+    evidence: { historyCompleteness: 'provider-visible', evidenceQuality: 'basic', rounds: 'missing', kills: 'missing', hasDamage: opts.players.every((p) => p.dmg !== null), hasPositions: false },
+    mapId: 'map-a', mapName: 'A', mode: opts.mode ?? 'competitive', queue: { id: null, name: null }, season: { key: null, ref: null },
+    startedAt: new Date(Date.UTC(2026, 0, 1) + seq * 3_600_000).toISOString(), durationMs: null,
+    teams: [{ teamKey: 'team-1', roundsWon: r1, roundsLost: r2, won }, { teamKey: 'team-2', roundsWon: r2, roundsLost: r1, won: won === null ? null : !won }],
     participants: opts.players.map((p, i) => ({ participantKey: `p${i}`, teamKey: `team-${p.team ?? 1}`, memberId: p.memberId, accountId: null, agentId: null, agentName: null,
-      stats: { kills: p.k, deaths: p.d, assists: p.a, damageDealt: p.dmg, score: null } })),
-    rounds: [], events: [], rankContextRefs: [],
+      stats: { status: 'observed' as const, kills: p.k, deaths: p.d, assists: p.a, score: null, damageDealt: p.dmg, damageReceived: null, headshots: null, bodyshots: null, legshots: null },
+      abilityCasts: { status: 'missing' as const, ability1: null, ability2: null, grenade: null, ultimate: null },
+      economy: { status: 'missing' as const, loadoutValueTotal: null, loadoutValueAverage: null, spentTotal: null, spentAverage: null } })),
+    rounds: [], events: [],
   };
 }
 
@@ -60,6 +63,14 @@ describe('basic-player-stats-v1', () => {
     const r = computeBasicPlayerStats([mk({ players: [{ memberId: 'member-a', k: 5, d: 1, a: 0, dmg: 1 }, { memberId: 'member-a', k: 5, d: 1, a: 0, dmg: 1 }, other] })], ['member-a']);
     expect(r.players[0]!.metrics.matchesPlayed).toBe(0);
     expect(r.players[0]!.eligibility).toEqual({ eligible: false, reasons: expect.arrayContaining([expect.stringContaining('withheld')]) });
+  });
+
+  it('withholds a match without observed statistics instead of counting zeros', () => {
+    const m = mk({ players: [{ memberId: 'member-a', k: 9, d: 1, a: 0, dmg: 500 }, other] });
+    const blank = { ...m, participants: m.participants.map((p) => (p.memberId ? { ...p, stats: { ...p.stats, status: 'missing' as const, kills: null, deaths: null, assists: null } } : p)) };
+    const r = computeBasicPlayerStats([blank], ['member-a']).players[0]!;
+    expect(r.metrics.matchesPlayed).toBe(0);
+    expect(r.eligibility.reasons.join(' ')).toContain('no observed statistics');
   });
 
   it('reports sample size and eligibility; output validates against the analytics contract', () => {

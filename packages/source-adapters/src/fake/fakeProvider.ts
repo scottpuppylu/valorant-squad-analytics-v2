@@ -60,7 +60,8 @@ export class FakeProviderAdapter implements DataProviderAdapter {
   async getRankContext(input: RankContextInput): Promise<RankContext[]> {
     const account = this.accounts.find((a) => a.fakePuuid === input.providerAccountRef);
     if (!account) return [];
-    return [{ rankContextId: `rank-${input.memberId}-current`, memberId: input.memberId, kind: 'current', observedAt: input.observedAt,
-      tierId: account.tierId, tierName: account.tierName, providerId: this.providerId }];
+    return [{ rankContextId: `rank-${input.accountId}-current`, memberId: input.memberId, accountId: input.accountId, kind: 'current', effectiveAt: input.observedAt,
+      matchKey: null, providerId: this.providerId, sourceEndpoint: 'fake:current', providerTierId: account.tierId, providerTierName: account.tierName, rr: null, rrChange: null,
+      providerElo: null, seasonKey: null, queue: 'competitive', normalizedTierKey: null, tierOrdinal: null, tierModelVersion: 'fake-tiers-v1' }];
   }
 }

@@ -33,7 +33,7 @@ describe('FakeProviderAdapter fixtures', () => {
   });
 
   it('serves rank context as context with provenance (never a score)', async () => {
-    const ctx = await new FakeProviderAdapter().getRankContext({ providerAccountRef: FAKE_ACCOUNTS[0]!.fakePuuid, memberId: 'member-nova', observedAt: OBSERVED_AT });
+    const ctx = await new FakeProviderAdapter().getRankContext({ providerAccountRef: FAKE_ACCOUNTS[0]!.fakePuuid, memberId: 'member-nova', accountId: 'account-nova', observedAt: OBSERVED_AT });
     expect(ctx).toEqual([expect.objectContaining({ kind: 'current', providerId: 'fake', memberId: 'member-nova' })]);
   });
 });

@@ -9,6 +9,7 @@
 | **Publication** | `@vsa/exporter` → `@vsa/privacy` → `@vsa/distribution` | Allowlisted public documents; immutable snapshots; manifest activation | Serialize database rows; emit private fields |
 | **Web** | `apps/web` | Rendering `manifest.json` + snapshot files | Database, provider or server API calls |
 | **Control (future)** | `apps/control-api` | Group / member / invite / consent / sync-job **metadata** | Store rounds, events, positions or analytics evidence |
+| **Legacy import (one-way)** | `apps/legacy-importer` | Read-only legacy staging → explicit normalization → canonical store | Be imported by any other workspace; write to a legacy source; infer consent |
 
 ## Provider abstraction
 
@@ -23,30 +24,42 @@
 - Skeletons only: `HenrikAdapter`, `RiotAdapter`, `OverwolfAdapter`. They declare no capabilities and have no network
   code or keys.
 
-## Canonical model (`canonical-schema-v1`)
+## Canonical model (`canonical-schema-v2`)
 
 - **`CanonicalMatch`** carries:
   - a provider-neutral derived `matchKey` (`cm_…`);
-  - `source`: provider, adapter version, normalizer version, private provider record ref and observed time;
-  - `evidence`: `historyCompleteness` (`unknown` | `provider-visible`), quality, and has-rounds / events / damage flags;
-  - map, mode, start, duration, teams, participants, rounds, kill events and rank-context references.
+  - `source`: provider, adapter version, normalizer version, private provider record ref, observed time, and
+    `acquisition` (`provider-adapter` | `legacy-import`) with its `acquisitionSource`;
+  - `evidence`: `historyCompleteness` (`unknown` | `provider-visible`), quality, rounds / kills evidence status
+    (`observed` | `missing` | `unavailable`), damage and position flags;
+  - map, mode (every mode is preserved), queue, season, start, duration, teams, participants, rounds, kill events.
+- **Participants** carry stats with an evidence status (never zero-filled), ability casts and economy. **Rounds** carry
+  winner, result, side (only from explicit evidence), plant (status, planter, time, site) and defuse, plus per-round
+  participant economy, weapon and armor. **Kill events** carry sequence, round / match time, actor, target, assistants
+  and weapon.
 - **Identity.** A participant carries an internal `memberId` and `accountId` (or null if untracked). Provider account
-  refs live only in `source_accounts`. Public ids are derived (`m_…`, `g_…`), never a PUUID.
-- **Spatial evidence.** Event `spatial` (locationX/Y, viewRadians) is **private canonical evidence** and has no public
+  refs live only in `source_accounts`; one account per member is primary. Public ids are derived (`m_…`, `g_…`), never
+  a PUUID.
+- **Spatial evidence.** Event / plant / defuse locations and per-event `playerSnapshots` (location, view) are
+  **private canonical evidence**, erasable per member (`erasePositionTelemetryForMember`), with no public
   representation.
-- **Consent.** Consent is four independent grants: identity connected, data collection, group visibility and public
-  derived analytics.
+- **Consent.** Four independent grants (identity connected, data collection, group visibility, public derived
+  analytics) plus a `status`: `explicit` or `requires-reconciliation`. An unreconciled consent grants nothing (schema and
+  database CHECK).
+- **Rank context.** Kinds `match-snapshot`, `history`, `current`, `peak`, `seasonal`, with provider tier, RR and
+  `providerElo` (provider semantics, never MMR). As-of-match lookup: the match's own snapshot, else the latest strictly
+  earlier history row of another match; current / peak / seasonal are never match-time context.
 
 ## Versions
 
-- Contracts: `canonical-schema-v1`, `analytics-contract-v1`, `public-snapshot-v1`, `manifest-v1`.
-- Adapter versions are independent (e.g. `fake-provider-v1`, `fake-normalizer-v1`).
+- Contracts: `canonical-schema-v2`, `control-contract-v2`, `analytics-contract-v1`, `public-snapshot-v1`, `manifest-v1`.
+- Adapter versions are independent (e.g. `fake-provider-v1`, `fake-normalizer-v2`, `legacy-henrik-v4-import-v1`).
 - Algorithms keep their identities. Bootstrap: `basic-player-stats-v1`. Future ports keep `event-metrics-v2`,
   `shared-match-rating-v1`, `team-composition-v1/-v2`.
 
 ## Storage
 
-- Fresh V2 migrations start at `0001` (`packages/canonical-data/migrations`).
+- Fresh V2 migrations start at `0001` (`packages/canonical-data/migrations`); `0002` = canonical-schema-v2.
 - Driver: `pg` for PostgreSQL 18, or PGlite (embedded, for tests and the zero-setup demo) behind one `SqlClient`
   interface.
 - `DATABASE_URL` configures local PostgreSQL only; no cloud database exists or is needed.

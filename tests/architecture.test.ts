@@ -32,6 +32,8 @@ describe('architecture checker detects violations (self-test)', () => {
     ['apps/control-api', `import { applyMigrations } from '@vsa/canonical-data';`, 'CONTROL_PLANE_CANONICAL_TELEMETRY_IMPORTS'],
     ['packages/privacy', `import { createHash } from 'node:crypto';`, 'BROWSER_UNSAFE_IMPORTS'],
     ['packages/exporter', `import { x } from '../../privacy/src/index.ts';`, 'CROSS_WORKSPACE_RELATIVE_IMPORTS'],
+    ['packages/canonical-data', `import { normalizeHenrikV4Match } from '@vsa/legacy-importer';`, 'LEGACY_IMPORTER_IN_CORE_IMPORTS'],
+    ['apps/collector', `import { LegacyEvidenceImportAdapter } from '@vsa/legacy-importer';`, 'LEGACY_IMPORTER_IN_CORE_IMPORTS'],
   ])('%s: %s → %s', (workspace, source, rule) => {
     expect(one(workspace, source).counts[rule]).toBe(1);
   });

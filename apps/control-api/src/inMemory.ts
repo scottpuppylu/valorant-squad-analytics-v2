@@ -25,7 +25,7 @@ export class InMemoryControlPlane implements ControlPlaneService {
     const member = GroupMember.parse({ memberId: this.id('member'), groupId, displayName, status: 'active', joinedAt: this.iso() });
     this.members.set(member.memberId, member);
     // Joining grants NOTHING: every consent starts false and must be granted explicitly.
-    this.consents.set(member.memberId, ConsentState.parse({ memberId: member.memberId, identityConnected: false, dataCollectionAllowed: false,
+    this.consents.set(member.memberId, ConsentState.parse({ memberId: member.memberId, status: 'explicit', source: 'control-plane', identityConnected: false, dataCollectionAllowed: false,
       groupVisibilityAllowed: false, publicDerivedAnalyticsAllowed: false, policyVersion: 'none', updatedAt: this.iso() }));
     return member;
   }
