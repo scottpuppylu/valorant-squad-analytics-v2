@@ -70,3 +70,8 @@ export {
 export { buildTeamCompositionEngine, sideMatchInput, type TeamCompositionEngine } from './team-composition/teamComposition.ts';
 
 export { buildProductAnalytics, fiveMemberSets, PRODUCT_BUILDER_VERSION, VALIDATED_GENERAL_RESPONSIBILITIES, WITHHELD_RESPONSIBILITY_LABELS, type ProductBuildOptions } from './product/buildProduct.ts';
+export { TEAM_COMPOSITION_LEGACY_VERSION } from './team-composition/recommend.ts';
+export {
+  agentSignatureId, assignmentSignature, compareCodePoints, compareDescWithTies, compareEnumeration, compareRecommendation, rankAssignments,
+  TEAM_COMPOSITION_TIE_EPSILON, TEAM_COMPOSITION_TIE_SEMANTICS_VERSION, tieEqual, withinComparableBand, type RankableAssignment,
+} from './team-composition/tieSemantics.ts';

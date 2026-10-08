@@ -55,7 +55,7 @@
 - Contracts: `canonical-schema-v2`, `control-contract-v2`, `analytics-contract-v1`, `product-contract-v1`, `public-snapshot-v2`, `manifest-v1`.
 - Adapter versions are independent (e.g. `fake-provider-v2`, `fake-normalizer-v3`, `legacy-henrik-v4-import-v1`).
 - Algorithms keep their identities. V2-PRODUCT-UI-WAVE-01 ported the accepted ones (`event-metrics-v1/-v2`,
-  `community-score-v2`, `adaptive-window-v1`, `shared-match-rating-v1`, `team-composition-v1/-v2`, `rank-context-v1`,
+  `community-score-v2`, `adaptive-window-v1`, `shared-match-rating-v1`, `team-composition-v1` (emitted as `team-composition-v1.1`, docs/TEAM_COMPOSITION_TIES.md) / `-v2`, `rank-context-v1`,
   `agent-catalog-v1`) into `packages/analytics` (basic/, agents/, event/, rank/, strength/, shared-match/,
   team-composition/, product/). See docs/V2_PRODUCT_UI.md and docs/SCORING.md.
 

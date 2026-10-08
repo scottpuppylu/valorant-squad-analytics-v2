@@ -112,7 +112,11 @@ guessed (`agent-catalog-v1`, stable agent id first).
 - Unavailable below 5 shared matches.
 - Confidence = 100 · √(min(n/30, 1) · partner diversity) · valid share.
 
-## Team Composition (`team-composition-v1`, `team-fit-hierarchy-v1`, `team-responsibility-v1`, `team-composition-v2`)
+## Team Composition (`team-composition-v1.1`, `team-fit-hierarchy-v1`, `team-responsibility-v1`, `team-composition-v2`)
+
+V2 emits `team-composition-v1.1` = the accepted `team-composition-v1` scoring / evidence / confidence / Team Fit model
+plus explicit deterministic floating-tie semantics ([TEAM_COMPOSITION_TIES.md](TEAM_COMPOSITION_TIES.md)).
+`team-composition-v1` names the legacy semantics (raw floating-point ordering); V2 does not claim to emit it.
 
 **Input:** exactly 5 distinct members and a map.
 
@@ -124,8 +128,10 @@ not validate as predictive).
 
 **Recommendation.**
 - Assignments within 0.2 σ (σ = the pooled within-member SD of one-match performance) of the best are comparable.
-- Among comparable assignments, the highest confidence wins; ties go to the higher score, then the agent key.
-- Values within 1e-9 count as equal (order invariance).
+- Among comparable assignments, the highest confidence wins; ties go to the higher score, then the assignment
+  signature.
+- v1.1: values within `TEAM_COMPOSITION_TIE_EPSILON` = 1e-9 (inclusive) are equal; the signature is
+  `memberId=agentContentId/role` in canonical member order (see TEAM_COMPOSITION_TIES.md).
 - **Two alternatives** are returned.
 
 **Team Fit** (0–100) = the mean percentile of each member's assigned agent among their own evidence-backed agents.

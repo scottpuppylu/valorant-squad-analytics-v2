@@ -57,6 +57,6 @@ export function emptyProduct(): ProductAnalytics {
     profiles: [],
     sharedMatch: { version: 'shared-match-rating-v1', evidenceVersion: 'shared-match-evidence-v1', neutralSigma: 0.2, shrinkK: 8, minMatches: 5, members: [], pairs: [],
       coverage: { possiblePairs: 0, pairsWithShared: 0, pairUnits: 0, scoredUnits: 0, minShared: null, medianShared: null, maxShared: null } },
-    teamBuilder: { v1Version: 'team-composition-v1', v2Version: 'team-composition-v2', fitVersion: 'team-fit-hierarchy-v1', maps: [], emittableAttack: [], emittableDefense: [], withheldLabels: [], results: [] },
+    teamBuilder: { v1Version: 'team-composition-v1.1', v2Version: 'team-composition-v2', fitVersion: 'team-fit-hierarchy-v1', maps: [], emittableAttack: [], emittableDefense: [], withheldLabels: [], results: [] },
   };
 }

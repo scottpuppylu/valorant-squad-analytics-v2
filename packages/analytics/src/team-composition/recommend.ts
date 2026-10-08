@@ -1,4 +1,7 @@
-// Ported from legacy `src/analytics/teamComposition/recommend.ts` (accepted, frozen at c063b52 / release 1a4c790). Algorithm body unchanged except the documented TIE_EPSILON order-invariance adaptation; parameter properties expanded (erasableSyntaxOnly); PairSynergySource moved to pairSynergySource.ts.
+// Ported from legacy `src/analytics/teamComposition/recommend.ts` (accepted team-composition-v1, frozen at c063b52 / release 1a4c790).
+// Scoring, evidence, confidence and Team Fit bodies unchanged. V2 changes: the ranking uses the explicit team-composition-v1.1
+// tie semantics of tieSemantics.ts (semantic equality + provider-neutral signature); parameter properties expanded
+// (erasableSyntaxOnly); PairSynergySource moved to pairSynergySource.ts.
 import type { PlayerRole } from '../event/matchViewTypes.ts';
 import { AGENT_DEFINITIONS, agentRoles, resolveAgent } from '../agents/agentCatalog.ts';
 import { NEUTRAL_SIGMA } from '../shared-match/rating.ts';
@@ -6,6 +9,7 @@ import { FitModel, fitConfidence, type IndividualFit } from './fit.ts';
 import { shrunkMapSynergy, type PairSynergySource } from './pairSynergySource.ts';
 import type { MemberObservation } from './observations.ts';
 import { assignResponsibilities, BehaviourModel, MIN_RESPONSIBILITY_MATCHES, type Responsibility } from './responsibility.ts';
+import { assignmentSignature, compareEnumeration, rankAssignments, TEAM_COMPOSITION_TIE_SEMANTICS_VERSION, withinComparableBand } from './tieSemantics.ts';
 
 /**
  * TASK-ANALYTICS-TEAM-COMPOSITION-01 — `team-composition-v1` (OUTCOME_B: data-supported lineup ranking; NOT a proven
@@ -27,7 +31,10 @@ import { assignResponsibilities, BehaviourModel, MIN_RESPONSIBILITY_MATCHES, typ
  * Confidence (0–100, separate): mean member confidence; member confidence = 100·√min(n(member × agent)/20, 1) in context
  * mode (direct agent evidence only; the full-hierarchy confidence in 'scored' mode). Experimental agents are capped at 25.
  */
-export const TEAM_COMPOSITION_VERSION = 'team-composition-v1' as const;
+/** The accepted legacy algorithm semantics (raw floating-point ordering). Kept as a label; V2 never claims to emit it. */
+export const TEAM_COMPOSITION_LEGACY_VERSION = 'team-composition-v1' as const;
+/** What V2 emits: the v1 scoring / evidence model + explicit deterministic floating-tie semantics (tieSemantics.ts). */
+export const TEAM_COMPOSITION_VERSION = TEAM_COMPOSITION_TIE_SEMANTICS_VERSION;
 export const TEAM_FIT_MEANING = "mean percentile of each member's assigned agent among their own evidence-backed agents (100 = everyone on their best historical fit; not a win probability)";
 export const DEFAULT_POOL_SIZE = 6;
 const EXPERIMENTAL_PER_MEMBER = 3;
@@ -122,21 +129,14 @@ function experimentalPool(model: TeamCompositionModel, memberId: string, map: st
     .sort((a, b) => b.fit.value! - a.fit.value! || a.agent.localeCompare(b.agent)).slice(0, EXPERIMENTAL_PER_MEMBER);
 }
 
-const keyOf = (picks: readonly Candidate[]) => picks.map((p) => p.agent).join(',');
-/**
- * V2 ADAPTATION (order invariance, V2-PRODUCT-UI-WAVE-01): sums over the five picks run in member-id order, and V2 member
- * ids sort differently from the legacy public ids, so mathematically EQUAL scores / confidences can differ in the last
- * floating-point bits. Values within TIE_EPSILON are treated as equal so the accepted tie-break (confidence → score →
- * agent key) decides, exactly as it does when the values are bit-identical. No accepted value or threshold changes.
- */
-const TIE_EPSILON = 1e-9;
-const desc = (x: number, y: number) => (Math.abs(x - y) <= TIE_EPSILON ? 0 : y - x);
+/** team-composition-v1.1 provider-neutral signature of an assignment (tieSemantics.ts). */
+const signatureOf = (picks: readonly Candidate[]) => assignmentSignature(picks.map((p) => ({ memberId: p.fit.memberId, agent: p.agent, role: p.role })));
 
-/** Every assignment of distinct agents over the pools, best score first (deterministic tie-break by agent names). */
-function enumerate(pools: readonly Candidate[][]): { picks: Candidate[]; score: number }[] {
-  const out: { picks: Candidate[]; score: number }[] = [];
+/** Every assignment of distinct agents over the pools, best score first (v1.1: semantic score equality → signature). */
+function enumerate(pools: readonly Candidate[][]): { picks: Candidate[]; score: number; signature: string }[] {
+  const out: { picks: Candidate[]; score: number; signature: string }[] = [];
   const walk = (index: number, picks: Candidate[], used: Set<string>) => {
-    if (index === pools.length) { out.push({ picks: [...picks], score: picks.reduce((s, c) => s + c.fit.value!, 0) / picks.length }); return; }
+    if (index === pools.length) { out.push({ picks: [...picks], score: picks.reduce((s, c) => s + c.fit.value!, 0) / picks.length, signature: signatureOf(picks) }); return; }
     for (const candidate of pools[index]!) {
       if (used.has(candidate.agent)) continue;
       used.add(candidate.agent); picks.push(candidate);
@@ -145,7 +145,7 @@ function enumerate(pools: readonly Candidate[][]): { picks: Candidate[]; score: 
     }
   };
   walk(0, [], new Set());
-  return out.sort((a, b) => desc(a.score, b.score) || keyOf(a.picks).localeCompare(keyOf(b.picks)));
+  return out.sort(compareEnumeration);
 }
 
 export function recommendTeamComposition(input: { memberIds: readonly string[]; map: string }, model: TeamCompositionModel,
@@ -178,9 +178,7 @@ export function recommendTeamComposition(input: { memberIds: readonly string[]; 
   const confidenceOf = (picks: readonly Candidate[]) => picks.reduce((s, p) => s + (p.experimental ? Math.min(model.memberConfidence(p.fit), 25) : model.memberConfidence(p.fit)), 0) / picks.length;
   const band = NEUTRAL_SIGMA * model.performanceSigma;
   const best = assignments[0]!.score;
-  const comparable = assignments.filter((a) => a.score >= best - band - TIE_EPSILON).map((a) => ({ ...a, confidence: confidenceOf(a.picks) }))
-    .sort((a, b) => desc(a.confidence, b.confidence) || desc(a.score, b.score) || keyOf(a.picks).localeCompare(keyOf(b.picks)));
-  const ranked = [...comparable, ...assignments.slice(comparable.length, comparable.length + 10).map((a) => ({ ...a, confidence: confidenceOf(a.picks) }))];
+  const ranked = rankAssignments(assignments.map((a) => ({ ...a, confidence: confidenceOf(a.picks) })), band);
   const personal = memberIds.map((id) => {
     const values = evidencedAgents(model, id, map).map((c) => c.fit.value!);
     return (fit: number) => (values.length <= 1 ? 100 : (100 * values.filter((v) => v < fit).length) / (values.length - 1));
@@ -217,7 +215,7 @@ export function recommendTeamComposition(input: { memberIds: readonly string[]; 
     for (const m of members) roleDistribution[m.role] += 1;
     return { label: rank === 0 ? 'RECOMMENDED_HISTORICAL_FIT' : 'ALTERNATIVE', members, roleDistribution, fitScore: assignment.score,
       teamFit: members.reduce((s, m, i) => s + personal[i]!(m.fit), 0) / members.length, confidence: assignment.confidence,
-      comparableToBest: assignment.score >= best - band - TIE_EPSILON, pairSynergy, tradeoff: null };
+      comparableToBest: withinComparableBand(assignment.score, best, band), pairSynergy, tradeoff: null };
   });
   const top = lineups[0]!;
   for (const alt of lineups.slice(1)) {

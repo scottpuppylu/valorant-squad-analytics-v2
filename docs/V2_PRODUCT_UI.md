@@ -31,11 +31,13 @@ Status: **COMPLETE / AWAITING SDD REVIEW** (2026-10-08). Local only: not pushed,
   (`canonical-schema-v2`). It replaces legacy `durable-evidence-v2`.
 - **Parameter properties expanded.** TypeScript `erasableSyntaxOnly` forbids parameter properties, so they are written
   out in `EventMetricEngine`, `TeamCompositionModel` and `SiteReference`.
-- **`TIE_EPSILON = 1e-9`** in `recommend.ts`:
-  - Legacy sums the five picks in member-id order. V2 ids sort differently.
-  - Mathematically equal confidences or scores can therefore differ in the last bits.
-  - Values within 1e-9 are treated as equal, so the accepted tie-break (confidence → score → agent key) decides.
-  - No value or threshold changed.
+- **Team Composition tie semantics → `team-composition-v1.1`** (formalized by V2-TEAM-COMPOSITION-TIE-SEMANTICS-01,
+  [TEAM_COMPOSITION_TIES.md](TEAM_COMPOSITION_TIES.md)):
+  - Legacy sums the five picks in member-id order. V2 ids sort differently, so mathematically equal confidences or
+    scores can differ in the last bits.
+  - V2 compares with `TEAM_COMPOSITION_TIE_EPSILON = 1e-9` and breaks remaining ties by a provider-neutral assignment
+    signature. This is a new minor semantic version, not bit-identical `team-composition-v1`.
+  - No value, weight, formula, evidence selection or threshold changed.
 - **Pair synergy.** `duo-synergy-v1` (pair synergy) is not ported in this wave. Team Composition scores none of it, so
   assignment, Team Fit and confidence are unaffected. `pairSynergy` is reported as "no evidence".
 - **Not ported (research only, legacy):**
@@ -67,7 +69,7 @@ Status: **COMPLETE / AWAITING SDD REVIEW** (2026-10-08). Local only: not pushed,
 | Non-Competitive event differences | 67 per engine, all EXPECTED (below) |
 | Community Score / Current Strength / Recent Form | 0 differences, 9 / 9 members, every dimension, status, value, confidence and window |
 | Shared-Match v1 | 0 differences: 1 341 pair units, 1 069 scorable, 36 / 36 pairs (min 14), σ 35.23, every member rating (combined / Competitive / Unrated / recent) and every pair aggregate |
-| Team Composition V1 + V2 | 378 runs (all 126 five-member sets × 3 maps: the two most and the least played). 375 exact. 3 EXPECTED_FLOAT_TIE. 0 unexplained |
+| Team Composition (V2 emits v1.1) + V2 layer | 378 runs (all 126 five-member sets × 3 maps: the two most and the least played). 375 exact legacy matches. 3 SEMANTIC_TIE_DIFFERENCE (ordering only; not counted as exact v1 parity). 0 unexplained |
 | Rank context | 1 717 / 1 717 tracked participations resolve to their own match snapshot; FUTURE_RANK_LEAKAGE = 0 |
 | Agent catalog | Competitive 841 / 841 known |
 
@@ -80,7 +82,8 @@ Status: **COMPLETE / AWAITING SDD REVIEW** (2026-10-08). Local only: not pushed,
 - **Custom, economy (28 records). EXPECTED.**
   - V2-DATA-IMPORT-01 withholds negative (out-of-domain) credit values as unavailable. Legacy kept the raw negatives.
   - Browse-only mode.
-- **Team Composition, one five-member set on 3 maps. EXPECTED_FLOAT_TIE**, classified automatically:
+- **Team Composition, one five-member set on 3 maps. SEMANTIC_TIE_DIFFERENCE** (team-composition-v1.1), classified
+  automatically:
   - the set of lineups is identical, and every matched lineup's values are equal;
   - only lineups whose confidences differ by ≤ 1e-9 swapped order;
   - the V2 layer over the legacy-ordered V1 result reproduces legacy V2 exactly.
@@ -92,7 +95,8 @@ Status: **COMPLETE / AWAITING SDD REVIEW** (2026-10-08). Local only: not pushed,
 - SHARED_MATCH_V1_PARITY = **PASS**
 - COMMUNITY_SCORE_PARITY = **PASS**
 - CURRENT_STRENGTH_PARITY = **PASS**
-- TEAM_COMPOSITION_V1_PARITY = **PASS**
+- TEAM_COMPOSITION_V1_PARITY = 375 / 378 exact; the 3 others are v1.1 semantic tie differences (TEAM_COMPOSITION_V1_1 =
+  ACCEPTABLE pending SDD, see TEAM_COMPOSITION_TIES.md)
 - TEAM_COMPOSITION_V2_PARITY = **PASS**
 
 **Real-data availability** (unchanged accepted figures):
