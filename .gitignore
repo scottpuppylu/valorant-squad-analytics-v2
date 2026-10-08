@@ -1,0 +1,30 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local environment and secrets (never commit real credentials)
+.env
+.env.*
+!.env.example
+!infra/local/.env.example
+.local/
+
+# Generated public snapshots (reproducible with npm run snapshot:demo)
+apps/web/public/public-data/
+public-data/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Agent tooling is per developer, never vendored
+.claude/
+skills-lock.json
