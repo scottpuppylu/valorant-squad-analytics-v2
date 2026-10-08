@@ -15,9 +15,9 @@ Evidence and per-provider details: [PROVIDER_MATRIX.md](PROVIDER_MATRIX.md). Des
 | Source | IDENTITY | MATCH_HISTORY | MATCH_DETAIL | RANK | FORWARD_LIVE | STATIC_CONTENT | Status |
 |---|---|---|---|---|---|---|---|
 | Fake (fixtures) | IMPLEMENTED | IMPLEMENTED | IMPLEMENTED | IMPLEMENTED | — | — | Synthetic demo provider |
-| Henrik (third-party API) | IMPLEMENTED | IMPLEMENTED (provider-visible subset) | IMPLEMENTED | IMPLEMENTED | — | DOCUMENTED, unused | **IMPLEMENT_NOW**: operator key server-side only; ≤ 6 RPM / ≤ 2 lanes; budgeted |
-| Riot (official API + RSO) | DOCUMENTED (RSO) | DOCUMENTED (depth UNKNOWN) | DOCUMENTED | — (leaderboards only) | — | DOCUMENTED | **PREPARE**: contract-only adapter, 0 requests; needs production key + RSO; ticket #139243830 open, no response |
-| Overwolf (client app) | live only | — | live only | UNKNOWN | DOCUMENTED | — | **RESEARCH_ONLY**: forward-only, approved app + Riot compliance; FUTURE design interface only |
+| Henrik (third-party API) | IMPLEMENTED | IMPLEMENTED (provider-visible subset) | IMPLEMENTED | IMPLEMENTED | — | DOCUMENTED, unused | **IMPLEMENT_NOW** (adapter): local, bounded, consented use; operator key server-side only; ≤ 6 RPM / ≤ 2 lanes; `HENRIK_PUBLIC_SCALE_BACKBONE = NO` |
+| Riot (official API + RSO) | DOCUMENTED (RSO) | DOCUMENTED (depth UNKNOWN) | DOCUMENTED | — (leaderboards only) | — | DOCUMENTED | **PREPARE**: long-term primary candidate (official match APIs exist; invite-group stats = candidate approved use case); contract-only adapter, 0 requests; needs production key + RSO + player opt-in; ticket #139243830 open, no response |
+| Overwolf (client app) | live only | — | live only | UNKNOWN | DOCUMENTED | — | **RESEARCH_ONLY**: FORWARD_LIVE feasible, no historical replacement established; needs Riot + Overwolf approval; FUTURE design interface only |
 | Tracker Network | — | — | — | — | — | — | **NOT_AVAILABLE** for VALORANT (staff: not permitted by Riot policy) |
 | Blitz | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | **NOT_AVAILABLE** (no public API found); partner UNKNOWN |
 | Manual / import archive | — | IMPLEMENTED | IMPLEMENTED | — | — | — | **IMPLEMENT_NOW**: `vsa-match-archive-v1`, private by default |

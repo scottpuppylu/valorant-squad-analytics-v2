@@ -3,6 +3,18 @@
 V2-PROVIDER-WAVE-01 (2026-10-09). Status: **AWAITING SDD REVIEW**. Evidence was checked on 2026-10-09 against public
 documentation only. Nothing was scraped, reverse engineered or called beyond the documented Henrik endpoints.
 
+## Binding provider policy (SDD, V2-STATIC-PUBLICATION-01)
+
+This section wins over any cell below that could be read more broadly.
+
+| Provider | Policy |
+|---|---|
+| **Henrik** | The technical adapter is implemented. Local, bounded, consented use is allowed. **`HENRIK_PUBLIC_SCALE_BACKBONE = NO`**: Henrik is not authorized as the long-term, large-scale public analytics backbone and is not the permanent V2 production source; no unlimited analytics scale is implied. Future member sync requires explicit consent. History is provider-visible only (`lifetimeComplete = false`); Henrik never proves lifetime completeness. This changes only with explicit future provider approval or a policy change. |
+| **Riot official** | `STATUS = PREPARE`. Official VALORANT API access is **not** impossible: official match APIs exist (VAL-MATCH-V1 and others). Player-facing stats require player opt-in, and RSO requires Production-level access. Our invite-only group stats use case is a **candidate approved use case** and Riot is the long-term primary candidate, subject to a Production key application. |
+| **Overwolf** | `STATUS = RESEARCH_ONLY`. FORWARD_LIVE is feasible; replacing historical acquisition is **not established**. Public VALORANT use requires both Riot and Overwolf approval. |
+| **Tracker Network** | A VALORANT public API is unavailable, based on the current published staff statement. |
+| **Blitz** | A public developer API is not established; partner / business availability is unknown. |
+
 ## Legend
 
 **Capability cells:**
@@ -64,8 +76,8 @@ documentation only. Nothing was scraped, reverse engineered or called beyond the
 
 | Provider | V2_USE_CASE | STATUS |
 |---|---|---|
-| **Henrik** | Current acquisition for consented members (bounded, ≤ 6 RPM / ≤ 2 lanes) | **IMPLEMENT_NOW** |
-| **Riot official** | Future official source once approved (ticket #139243830 open, `RIOT_SUPPORT_RESPONSE_RECEIVED = NO`) | **PREPARE** (contract-only adapter; 0 requests) |
+| **Henrik** | Local, bounded acquisition for consented members (≤ 6 RPM / ≤ 2 lanes); not the public-scale backbone | **IMPLEMENT_NOW** (adapter) |
+| **Riot official** | Long-term primary candidate; future official source once approved (ticket #139243830 open, `RIOT_SUPPORT_RESPONSE_RECEIVED = NO`) | **PREPARE** (contract-only adapter; 0 requests) |
 | **Overwolf** | Possible future FORWARD_LIVE capture of completed, consented matches | **RESEARCH_ONLY** |
 | **Tracker Network** | None | **NOT_AVAILABLE** (scraping = **DO_NOT_USE**) |
 | **Blitz** | None | **NOT_AVAILABLE** (no public API found; partner availability UNKNOWN; scraping or private endpoints = **DO_NOT_USE**) |
