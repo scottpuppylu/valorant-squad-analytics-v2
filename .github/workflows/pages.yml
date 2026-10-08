@@ -1,0 +1,54 @@
+# Synthetic-demo static site → GitHub Pages. ZERO secrets: no provider key, no DATABASE_URL, no private env.
+# Data comes only from the offline FakeProviderAdapter fixture (npm run snapshot:demo inside check:privacy).
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Architecture boundaries (web ↛ DB / provider)
+        run: npm run check:architecture
+      - name: Typecheck and build every workspace
+        run: npm run build
+      - name: Synthetic snapshot → web build → public-data and bundle privacy scan
+        # Regenerates the synthetic snapshot, rebuilds the web app with it and scans the exact dist uploaded below.
+        run: npm run check:privacy
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

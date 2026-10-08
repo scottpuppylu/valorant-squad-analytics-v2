@@ -13,6 +13,10 @@ const INTERNAL_ID_PATTERNS: readonly [string, RegExp][] = [
   ['internal-group-id', /\bgroup-demo\b/u],
 ];
 const DB_STRINGS = ['DATABASE_URL', 'postgres://', 'postgresql://', 'PGPASSWORD', 'PGHOST', 'POSTGRES_PASSWORD'];
+/** Operator / provider markers that must never reach a public artifact (private reports, credential files, provider runtime). */
+const OPERATOR_MARKERS = ['.private/', 'provider.env', 'HENRIK_API_KEY', 'RIOT_API_KEY', 'api.henrikdev.xyz', 'api.riotgames.com', 'IDENTIFIER_HMAC_KEY'];
+/** Riot PUUIDs are 78-character url-safe tokens; nothing public has that shape. */
+const PUUID_SHAPE = /(?<![A-Za-z0-9_-])[A-Za-z0-9_-]{78}(?![A-Za-z0-9_-])/u;
 
 export interface ScanFinding { file: string; problem: string }
 
@@ -22,6 +26,8 @@ function scanText(file: string, text: string, coordinateStrings: readonly string
   for (const name of findSecretPatterns(text)) findings.push({ file, problem: `secret pattern ${name}` });
   for (const [name, rx] of INTERNAL_ID_PATTERNS) if (rx.test(text)) findings.push({ file, problem: `internal id ${name}` });
   for (const s of DB_STRINGS) if (text.includes(s)) findings.push({ file, problem: `database string ${s}` });
+  for (const s of OPERATOR_MARKERS) if (text.includes(s)) findings.push({ file, problem: `operator / provider marker ${s}` });
+  if (PUUID_SHAPE.test(text)) findings.push({ file, problem: 'puuid-shaped token' });
   const hit = coordinateStrings.find((c) => text.includes(c));
   if (hit) findings.push({ file, problem: `raw fixture coordinate ${hit}` });
   return findings;

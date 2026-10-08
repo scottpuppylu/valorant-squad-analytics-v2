@@ -27,4 +27,11 @@ describe('privacy scanners detect planted leaks', () => {
       expect(problems).toContain(expected);
     }
   }));
+
+  it('web bundle scan flags operator / provider markers and puuid-shaped tokens', () => withTempDir(async (dist) => {
+    const token = 'A'.repeat(40) + '-' + 'b'.repeat(37);
+    await writeFile(join(dist, 'leak.js'), `x=".private/report.json";y="provider.env";z="HENRIK_API_KEY";u="https://api.henrikdev.xyz/v";p="${token}";`, 'utf8');
+    const problems = (await scanWebBundle(dist)).findings.map((f) => f.problem).join('\n');
+    for (const expected of ['marker .private/', 'marker provider.env', 'marker HENRIK_API_KEY', 'marker api.henrikdev.xyz', 'puuid-shaped token']) expect(problems).toContain(expected);
+  }));
 });

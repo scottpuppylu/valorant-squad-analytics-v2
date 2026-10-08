@@ -36,6 +36,11 @@ export function Shell({ route, state }: { route: Route; state: SnapshotState }) 
           {ROUTES.map((r) => <a key={r.path} href={`#${r.path}`} aria-current={active === r.path ? 'page' : undefined}>{r.label}</a>)}
         </nav>
       </header>
+      {/* The only published data mode is the synthetic demo: the notice is part of every page, Dashboard included. */}
+      <section className="demo-banner" role="note" aria-label="示範資料說明">
+        <strong className="demo-tag">DEMO / 示範資料</strong>
+        <span>目前網站使用合成示範資料，不是實際玩家公開資料。成員與對戰紀錄皆為虛構。</span>
+      </section>
       <main id="main" className="main" tabIndex={-1}><Page route={route} state={state} /></main>
       <footer className="footer">
         <span>社群表現分析：非官方牌位、非 MMR、非勝率預測。</span>

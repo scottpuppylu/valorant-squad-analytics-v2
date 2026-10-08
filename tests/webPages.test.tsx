@@ -108,6 +108,16 @@ describe('product pages render from the static snapshot only', () => {
     expect(renderToString(<TeamBuilder state={state} initial={{ selection: sel, submitted: true }} />)).toContain('data-state="result"');
   });
 
+  it('every page, Dashboard included, carries the prominent synthetic-demo notice (not a footer-only disclaimer)', () => {
+    for (const hash of ['#/', '#/players', '#/compare', '#/synergy', '#/team-builder', '#/about']) {
+      const page = html(hash);
+      expect(page).toContain('DEMO / 示範資料');
+      expect(page).toContain('目前網站使用合成示範資料，不是實際玩家公開資料。');
+    }
+    const markup = renderToString(<Shell route={parseRoute('#/')} state={state} />);
+    expect(markup.indexOf('demo-banner')).toBeLessThan(markup.indexOf('id="main"'));
+  });
+
   it('About: data, provider-visible limitation, Team Fit, Shared-Match, confidence, privacy and group scope', () => {
     const page = html('#/about');
     for (const text of ['使用哪些資料', 'lifetimeComplete = false', 'Team Fit', '同場比較', '信心度與樣本數', '隱私', '群組範圍']) expect(page).toContain(text);
