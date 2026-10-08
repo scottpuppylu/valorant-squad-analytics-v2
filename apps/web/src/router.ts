@@ -8,8 +8,15 @@ export const ROUTES = [
   { path: '/synergy', label: '同場比較' },
   { path: '/team-builder', label: '組隊建議' },
   { path: '/about', label: '資料與方法' },
+  { path: '/product', label: '產品說明' },
+  { path: '/demo-flow', label: '同意流程示範' },
 ] as const;
-export type RoutePath = (typeof ROUTES)[number]['path'];
+/** Policy pages: linked from the footer and the product page (not in the main navigation). */
+export const POLICY_ROUTES = [
+  { path: '/privacy', label: '隱私權政策 Privacy' },
+  { path: '/terms', label: '服務條款 Terms' },
+] as const;
+export type RoutePath = (typeof ROUTES)[number]['path'] | (typeof POLICY_ROUTES)[number]['path'];
 
 export type Route =
   | { page: 'dashboard' }
@@ -18,7 +25,11 @@ export type Route =
   | { page: 'compare'; a: string | null; b: string | null }
   | { page: 'synergy' }
   | { page: 'team-builder' }
-  | { page: 'about' };
+  | { page: 'about' }
+  | { page: 'product' }
+  | { page: 'demo-flow' }
+  | { page: 'privacy' }
+  | { page: 'terms' };
 
 const MEMBER = /^m_[0-9a-f]{16}$/u;
 
@@ -35,6 +46,10 @@ export function parseRoute(hash: string): Route {
   if (path === '/synergy') return { page: 'synergy' };
   if (path === '/team-builder') return { page: 'team-builder' };
   if (path === '/about') return { page: 'about' };
+  if (path === '/product') return { page: 'product' };
+  if (path === '/demo-flow') return { page: 'demo-flow' };
+  if (path === '/privacy') return { page: 'privacy' };
+  if (path === '/terms') return { page: 'terms' };
   return { page: 'dashboard' };
 }
 
@@ -45,6 +60,10 @@ export function routePath(route: Route): RoutePath {
     case 'synergy': return '/synergy';
     case 'team-builder': return '/team-builder';
     case 'about': return '/about';
+    case 'product': return '/product';
+    case 'demo-flow': return '/demo-flow';
+    case 'privacy': return '/privacy';
+    case 'terms': return '/terms';
     default: return '/';
   }
 }

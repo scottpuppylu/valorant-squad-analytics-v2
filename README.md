@@ -28,6 +28,8 @@ telemetry. See [docs/ARCHITECTURE_V2.md](docs/ARCHITECTURE_V2.md).
 https://scottpuppylu.github.io/valorant-squad-analytics-v2/ is a **synthetic demo** (DEMO / 示範資料). Every member and
 match there is fictional. It is built by `.github/workflows/pages.yml` with zero secrets and no real data
 ([docs/STATIC_PUBLICATION.md](docs/STATIC_PUBLICATION.md)).
+Reviewer pages: `#/product`, the synthetic opt-in walkthrough `#/demo-flow`, `#/privacy` and `#/terms` (drafts; nothing has been
+submitted to Riot — [docs/RIOT_PRODUCTION_APPLICATION.md](docs/RIOT_PRODUCTION_APPLICATION.md)).
 
 ## Quick start (Node.js 24+, npm)
 

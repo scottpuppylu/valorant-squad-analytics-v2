@@ -41,7 +41,7 @@ export function PlayerProfile({ state, memberId }: { state: ReadySnapshot; membe
 
       <Section title="總覽">
         <div className="metric-grid">
-          <Metric metric={p.currentStrength} label="目前實力（近期區間）" />
+          <Metric metric={p.currentStrength} label="近期表現（近期區間）" />
           <Metric metric={p.communityScore} label="社群分數（全部競技紀錄）" />
           <div className="metric" data-metric="recent-form">
             <div className="metric-label">近期狀態</div>

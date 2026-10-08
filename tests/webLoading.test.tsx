@@ -30,7 +30,7 @@ describe('static web loading', () => {
     const state = await loadSnapshot(fsFetcher(root));
     expect(state.status).toBe('ready');
     const html = renderToString(<Shell route={{ page: 'dashboard' }} state={state} />);
-    for (const text of [DEMO_GROUP.name, snapshotId, 'public-snapshot-v2', 'Nova', 'Juno', '目前實力', '目前可追蹤紀錄']) expect(html).toContain(text);
+    for (const text of [DEMO_GROUP.name, snapshotId, 'public-snapshot-v2', 'Nova', 'Juno', '近期表現', '目前可追蹤紀錄']) expect(html).toContain(text);
     expect(html).not.toContain('Pike');
     expect(renderToString(<Page route="/players" state={state} />)).toContain('Rook');
   }));
@@ -90,8 +90,8 @@ describe('static web loading', () => {
     for (const s of states) expect(renderToString(<StatusView state={s} />)).toContain(`data-status="${s.status}"`);
   });
 
-  it('declares the six product routes', () => {
-    expect(ROUTES.map((r) => r.path)).toEqual(['/', '/players', '/compare', '/synergy', '/team-builder', '/about']);
+  it('declares the six product routes plus the reviewer pages (product overview, opt-in walkthrough)', () => {
+    expect(ROUTES.map((r) => r.path)).toEqual(['/', '/players', '/compare', '/synergy', '/team-builder', '/about', '/product', '/demo-flow']);
     for (const r of ROUTES) expect(renderToString(<Page route={r.path} state={{ status: 'loading' }} />).length).toBeGreaterThan(0);
   });
 });

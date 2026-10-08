@@ -9,6 +9,21 @@ V2-CONSENT-CONTROL-PLANE-01 (2026-10-09). Status: **design / interfaces only**.
 | Riot support ticket | #139243830 open; `RIOT_SUPPORT_RESPONSE_RECEIVED = NO` |
 | Riot requests made | 0 |
 
+**Control-plane status (V2-RSO-PRODUCTION-READINESS-01):**
+- `CONTROL_PLANE_DOMAIN = IMPLEMENTED`
+- `CONTROL_PLANE_PERSISTENCE = PROTOTYPE_ONLY` (in-memory reference)
+- `CONTROL_PLANE_DEPLOYED = NO`
+- `LIVE_AUTHENTICATION = NO`
+- `LIVE_RSO = NO`
+
+**Riot requirements** (official docs, retrieved 2026-10-09; details in
+[RIOT_PRODUCTION_APPLICATION.md](RIOT_PRODUCTION_APPLICATION.md)):
+- RSO clients exist only for an approved production application;
+- player opt-in and an in-app account-linking disclaimer are required;
+- the website must be verified with `riot.txt` at its root.
+
+The public synthetic walkthrough of this flow is `#/demo-flow`, and the reviewer page is `#/product`.
+
 **Provider policy** ([PROVIDER_MATRIX.md](PROVIDER_MATRIX.md)):
 - Riot is `PREPARE` and the long-term primary candidate.
 - RSO requires Production-level access.

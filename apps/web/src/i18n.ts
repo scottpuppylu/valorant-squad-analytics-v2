@@ -49,7 +49,7 @@ export const RECENT_FORM_LABEL = { up: '上升', flat: '持平', down: '下降',
 /** Concise explanations (what it means for the reader; no implementation internals). */
 export const EXPLANATION: Record<ExplanationKey, { title: string; body: string }> = {
   'community-score': { title: '社群分數', body: '以群組內透明基準，把火力、回合影響、開局、團隊協作、殘局、經濟效率、穩定度與角色價值 8 個面向（0–100）加權合成。只用競技模式，並依特務角色使用不同基準，不會自動偏好決鬥者。不是官方牌位，也不是 MMR。' },
-  'current-strength': { title: '目前實力', body: '同一套社群分數，但只看最近的一段競技對戰：依回合數、活躍天數與時間跨度自動決定區間（最多 50 場、回溯 120 天）。區間樣本不足時不給數字。' },
+  'current-strength': { title: '近期表現', body: '同一套社群分數，但只看最近的一段競技對戰：依回合數、活躍天數與時間跨度自動決定區間（最多 50 場、回溯 120 天）。區間樣本不足時不給數字。這是群組內的表現統計，不是官方牌位、MMR、Elo 或隱藏分，也不代表天梯位置。' },
   'recent-form': { title: '近期狀態', body: '最近一小段區間的社群分數，減去更早且不重疊、樣本可比的基準區間；差距超過 ±2 分才標示上升或下降。' },
   'shared-match': { title: '同場比較（Shared-Match）', body: '只比較兩位成員「同一場」的表現（單場火力面向）。每場共同對戰算一次，結果向 50 收縮（n/(n+8)）。50 代表在共同對戰中旗鼓相當。不是 MMR、不是真實技術排名，也不是勝率。' },
   'team-fit': { title: 'Team Fit（陣容契合度）', body: '每位成員被分配到的特務，在他自己有證據的特務中的歷史排名百分位，再取五人平均。100 代表五人都在用自己歷史上最適合的特務。這是「歷史相對契合度」，不是勝率、不是未來預測，也不證明這是最佳陣容。' },

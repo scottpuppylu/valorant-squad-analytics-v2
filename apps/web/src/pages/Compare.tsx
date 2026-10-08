@@ -49,7 +49,7 @@ export function Compare({ state, a, b }: { state: ReadySnapshot; a: string | nul
             <table className="table compare-table">
               <thead><tr><th scope="col">{vm.a.profile.displayName}</th><th scope="col">項目</th><th scope="col">{vm.b.profile.displayName}</th></tr></thead>
               <tbody>
-                <Line label="目前實力" a={metric(vm.a, 'currentStrength')} b={metric(vm.b, 'currentStrength')} />
+                <Line label="近期表現" a={metric(vm.a, 'currentStrength')} b={metric(vm.b, 'currentStrength')} />
                 <Line label="社群分數（全部）" a={metric(vm.a, 'communityScore')} b={metric(vm.b, 'communityScore')} />
                 <Line label="近期狀態" a={RECENT_FORM_LABEL[vm.a.profile.recentForm.status]} b={RECENT_FORM_LABEL[vm.b.profile.recentForm.status]} />
                 <Line label="競技場次" a={vm.a.profile.competitiveMatches} b={vm.b.profile.competitiveMatches} />

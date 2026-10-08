@@ -26,7 +26,7 @@ export function Players({ state }: { state: ReadySnapshot }) {
               <dl className="mini">
                 <div><dt>競技</dt><dd>{p.competitiveMatches} 場</dd></div>
                 <div><dt>所有模式</dt><dd>{p.matchesObserved} 場</dd></div>
-                <div><dt>目前實力</dt><dd>{profile && profile.currentStrength.value !== null && profile.currentStrength.status !== 'insufficient' ? formatScore(profile.currentStrength.value) : '—'}</dd></div>
+                <div><dt>近期表現</dt><dd>{profile && profile.currentStrength.value !== null && profile.currentStrength.status !== 'insufficient' ? formatScore(profile.currentStrength.value) : '—'}</dd></div>
                 <div><dt>期間</dt><dd>{formatDate(p.firstObservedAt)} – {formatDate(p.lastObservedAt)}</dd></div>
               </dl>
               {profile ? <StatusBadge status={profile.currentStrength.status} /> : null}

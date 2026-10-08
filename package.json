@@ -23,7 +23,8 @@
     "db:down": "docker compose -f infra/local/docker-compose.yml --env-file infra/local/.env down",
     "db:migrate": "node apps/collector/src/cli.ts migrate",
     "import:legacy": "node apps/legacy-importer/src/cli.ts",
-    "report:private": "node apps/collector/src/cli.ts private-report"
+    "report:private": "node apps/collector/src/cli.ts private-report",
+    "docs:legal": "node scripts/legal-docs.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",

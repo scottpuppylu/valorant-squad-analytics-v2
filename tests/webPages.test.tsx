@@ -47,7 +47,7 @@ describe('product pages render from the static snapshot only', () => {
 
   it('Dashboard: group title, coverage period, ranking by Current Strength, insufficient members listed separately, quick entries', () => {
     const page = html('#/');
-    for (const text of [state.group.group.name, '資料期間', '目前實力排名', '比較兩位成員', '組隊建議', '樣本不足（不排名）', 'Kite']) expect(page).toContain(text);
+    for (const text of [state.group.group.name, '資料期間', '近期表現排序', '比較兩位成員', '組隊建議', '樣本不足（不列入排序）', 'Kite']) expect(page).toContain(text);
     const vm = dashboardViewModel(state);
     expect(vm.ranked.map((r) => r.rank)).toEqual(vm.ranked.map((_, i) => i + 1));
     expect(vm.insufficient.map((r) => r.profile.displayName)).toContain('Kite');
@@ -57,7 +57,7 @@ describe('product pages render from the static snapshot only', () => {
 
   it('Player Profile: overview, basic, advanced, dimensions, context, shared-match and evidence; unknown rank is shown as unknown', () => {
     const nova = html(`#/players/${idOf('Nova')}`);
-    for (const text of ['目前實力（近期區間）', '社群分數（全部競技紀錄）', '基本數據（競技）', 'K/D', 'ADR', 'ACS', 'KAST', '首殺 / 首死', '補槍擊殺 / 被補槍', '殘局 勝 / 次', '回合影響',
+    for (const text of ['近期表現（近期區間）', '社群分數（全部競技紀錄）', '基本數據（競技）', 'K/D', 'ADR', 'ACS', 'KAST', '首殺 / 首死', '補槍擊殺 / 被補槍', '殘局 勝 / 次', '回合影響',
       '八個面向', '牌位（對戰當時）', '特務', '地圖', '同場比較（Shared-Match）', '證據與限制']) expect(nova).toContain(text);
     expect(html(`#/players/${idOf('Juno')}`)).toContain('沒有牌位證據（不推測）');
     expect(html('#/players/m_0000000000000000')).toContain('找不到這位成員');
@@ -127,7 +127,7 @@ describe('product pages render from the static snapshot only', () => {
   it('mobile structure: data tables carry per-cell labels and the stylesheet stacks them under 640 px (no horizontal scroll)', async () => {
     const page = html('#/');
     expect(page).toContain('class="table responsive"');
-    expect(page).toContain('data-label="目前實力"');
+    expect(page).toContain('data-label="近期表現"');
     const css = await readFile(join(import.meta.dirname, '../apps/web/src/styles.css'), 'utf8');
     expect(css).toMatch(/@media \(max-width: 640px\)[\s\S]*\.table\.responsive td\[data-label\]::before/u);
     expect(css).not.toMatch(/overflow-x:\s*auto/u);
