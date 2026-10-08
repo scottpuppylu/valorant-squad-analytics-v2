@@ -15,6 +15,14 @@ External sources ─► source adapters ─► local collector ─► local Post
 The future control plane (auth / groups / invites / consent / sync jobs) is logically separate and never stores match
 telemetry. See [docs/ARCHITECTURE_V2.md](docs/ARCHITECTURE_V2.md).
 
+## Data boundary
+
+- Real private data — member, match, position and consent data — is **never committed** to this repository.
+- All repository and demo data is **synthetic** (an offline fake provider with fictional players).
+- Local PostgreSQL is the canonical analytics data store; V2 does **not** require Neon or any other cloud database.
+- Source providers are replaceable adapters; analytics consume only provider-neutral canonical evidence.
+- Public web output consumes only sanitized, versioned static snapshots.
+
 ## Quick start (Node.js 24+, npm)
 
 ```bash

@@ -13,7 +13,19 @@ npm-debug.log*
 .env.*
 !.env.example
 !infra/local/.env.example
+provider.env
+secrets/
 .local/
+
+# Database dumps / backup artifacts (migration .sql sources stay trackable)
+*.dump
+*.pgdump
+*.backup
+*.sql.gz
+
+# Private key material
+*.key
+*.pem
 # Private operator reports over real data (never committed, never published)
 .private/
 
