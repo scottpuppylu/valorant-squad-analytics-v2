@@ -15,6 +15,7 @@ export const RULES = [
   'CONTROL_PLANE_CANONICAL_TELEMETRY_IMPORTS',
   'BROWSER_UNSAFE_IMPORTS', 'CROSS_WORKSPACE_RELATIVE_IMPORTS', 'UNDECLARED_WORKSPACE_DEPENDENCIES',
   'LEGACY_IMPORTER_IN_CORE_IMPORTS', 'PROVIDER_TYPES_OUTSIDE_ADAPTERS',
+  'CONTROL_PLANE_CANONICAL_MATCH_STORAGE', 'CONTROL_PLANE_PROVIDER_NETWORK_CALLS', 'CONTROL_PLANE_ANALYTICS_IMPORTS',
 ] as const;
 
 const stripComments = (source: string) => source.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/(^|[^:'"`])\/\/.*$/gmu, '$1');
@@ -42,12 +43,29 @@ const PROVIDER_SUBPATH = /^@vsa\/source-adapters\/(henrik|riot|overwolf|import)(
 const PROVIDER_ENDPOINT = /henrikdev\.xyz|api\.riotgames\.com|\.api\.riotgames\.com|tracker\.gg\/api|overwolf\.games/iu;
 const providerSubpathAllowed = (workspace: string, specifier: string) => workspace === 'packages/source-adapters'
   || (workspace === 'apps/legacy-importer' && specifier === '@vsa/source-adapters/henrik');
+/**
+ * Control plane (apps/control-api): metadata only. It must not model canonical match telemetry, must not make outbound
+ * provider / network calls (the local worker polls it, never the reverse), and must not reach analytics or the exporter.
+ */
+const CONTROL_TELEMETRY = /\b(CanonicalMatch|CanonicalRound|CanonicalEvent|CanonicalParticipant|playerSnapshots|providerRecordRef|matchKey|kill_events|round_participants|viewRadians)\b/u;
+const CONTROL_NETWORK = /\bfetch\s*\(|\bhttps?\.(request|get)\s*\(|\bXMLHttpRequest\b|\bnew\s+WebSocket\b|henrikdev|riotgames\.com|overwolf|tracker\.gg/iu;
+const CONTROL_NETWORK_MODULES = (s: string) => s === 'node:https' || s === 'https' || s === 'undici' || s === 'axios' || s === 'node-fetch'
+  || s.startsWith('@vsa/source-adapters');
 const BROWSER_SAFE_WORKSPACES = new Set(['packages/contracts', 'packages/privacy', 'apps/web']);
 
 export function analyzeFiles(files: readonly SourceFile[], declaredDependencies: ReadonlyMap<string, ReadonlySet<string>> = new Map()): ArchitectureReport {
   const violations: Violation[] = [];
   const add = (rule: string, f: SourceFile, specifier: string) => violations.push({ rule, workspace: f.workspace, file: f.path, specifier });
   for (const f of files) {
+    if (f.workspace === 'apps/control-api') {
+      const code = stripComments(f.source);
+      if (CONTROL_TELEMETRY.test(code)) add('CONTROL_PLANE_CANONICAL_MATCH_STORAGE', f, '<canonical telemetry identifier>');
+      if (CONTROL_NETWORK.test(code)) add('CONTROL_PLANE_PROVIDER_NETWORK_CALLS', f, '<outbound network call>');
+      for (const s of importSpecifiers(f.source)) {
+        if (CONTROL_NETWORK_MODULES(s)) add('CONTROL_PLANE_PROVIDER_NETWORK_CALLS', f, s);
+        if (s.startsWith('@vsa/analytics') || s.startsWith('@vsa/exporter')) add('CONTROL_PLANE_ANALYTICS_IMPORTS', f, s);
+      }
+    }
     if (f.workspace !== 'packages/source-adapters' && PROVIDER_ENDPOINT.test(stripComments(f.source))) add('PROVIDER_TYPES_OUTSIDE_ADAPTERS', f, '<provider endpoint literal>');
     for (const s of importSpecifiers(f.source)) {
       if (PROVIDER_SUBPATH.test(s) && !providerSubpathAllowed(f.workspace, s)) add('PROVIDER_TYPES_OUTSIDE_ADAPTERS', f, s);

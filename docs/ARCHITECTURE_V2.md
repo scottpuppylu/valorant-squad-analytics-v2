@@ -8,7 +8,7 @@
 | **Analytics** | `@vsa/analytics` | Accepted algorithms over canonical contracts (pure functions) | SQL, provider payload types, I/O |
 | **Publication** | `@vsa/exporter` → `@vsa/privacy` → `@vsa/distribution` | Allowlisted public documents; immutable snapshots; manifest activation | Serialize database rows; emit private fields |
 | **Web** | `apps/web` | Rendering `manifest.json` + snapshot files | Database, provider or server API calls |
-| **Control (future)** | `apps/control-api` | Group / member / invite / consent / sync-job **metadata** | Store rounds, events, positions or analytics evidence |
+| **Control** (`control-plane-v1`, local only) | `apps/control-api` | Users, groups, memberships, invites, identity connections, consent, sync-job / lease metadata, revocation outbox, audit ([CONTROL_PLANE_DESIGN.md](CONTROL_PLANE_DESIGN.md)) | Store rounds, events, positions or analytics evidence; call providers; accept inbound connections to the home machine |
 | **Legacy import (one-way)** | `apps/legacy-importer` | Read-only legacy staging → explicit normalization → canonical store | Be imported by any other workspace; write to a legacy source; infer consent |
 
 ## Provider abstraction
@@ -59,7 +59,7 @@
 
 ## Versions
 
-- Contracts: `canonical-schema-v2`, `control-contract-v2`, `analytics-contract-v1`, `product-contract-v1`, `public-snapshot-v2`, `manifest-v1`.
+- Contracts: `canonical-schema-v2`, `control-contract-v2` (+ additive `control-plane-v1`), `analytics-contract-v1`, `product-contract-v1`, `public-snapshot-v2`, `manifest-v1`.
 - Adapter versions are independent (e.g. `fake-provider-v2`, `fake-normalizer-v3`, `henrik-adapter-v1`, `henrik-v4-normalizer-v1`,
   `legacy-henrik-v4-import-v1`, `import-file-adapter-v1`).
 - Algorithms keep their identities. V2-PRODUCT-UI-WAVE-01 ported the accepted ones (`event-metrics-v1/-v2`,

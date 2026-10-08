@@ -39,6 +39,11 @@ describe('architecture checker detects violations (self-test)', () => {
     ['packages/analytics', `import type { X } from '@vsa/source-adapters/import';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
     ['apps/legacy-importer', `import { RiotAdapter } from '@vsa/source-adapters/riot';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
     ['apps/collector', `const base = 'https://api.henrikdev.xyz/valorant';`, 'PROVIDER_TYPES_OUTSIDE_ADAPTERS'],
+    ['apps/control-api', `interface Row { matchKey: string }`, 'CONTROL_PLANE_CANONICAL_MATCH_STORAGE'],
+    ['apps/control-api', `const r = await fetch(url);`, 'CONTROL_PLANE_PROVIDER_NETWORK_CALLS'],
+    ['apps/control-api', `import https from 'node:https';`, 'CONTROL_PLANE_PROVIDER_NETWORK_CALLS'],
+    ['apps/control-api', `import { HenrikAdapter } from '@vsa/source-adapters';`, 'CONTROL_PLANE_PROVIDER_NETWORK_CALLS'],
+    ['apps/control-api', `import { buildProductAnalytics } from '@vsa/analytics';`, 'CONTROL_PLANE_ANALYTICS_IMPORTS'],
   ])('%s: %s → %s', (workspace, source, rule) => {
     expect(one(workspace, source).counts[rule]).toBe(1);
   });

@@ -12,3 +12,5 @@ export const ANALYTICS_CONTRACT_VERSION = 'analytics-contract-v1' as const;
 export const PUBLIC_SNAPSHOT_VERSION = 'public-snapshot-v2' as const;
 export const MANIFEST_VERSION = 'manifest-v1' as const;
 export const CONTROL_CONTRACT_VERSION = 'control-contract-v2' as const;
+/** V2-CONSENT-CONTROL-PLANE-01: groups / invites / identity connections / consent / sync jobs / audit domain (additive). */
+export const CONTROL_PLANE_VERSION = 'control-plane-v1' as const;

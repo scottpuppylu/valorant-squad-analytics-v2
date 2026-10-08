@@ -10,7 +10,7 @@ const PRIVATE_KEYS = new Set([
   'puuid', 'matchidraw', 'rawmatchid', 'providermatchid', 'providerrecordref', 'provideraccountref', 'accountref',
   'participantid', 'rawparticipantid', 'participantkey', 'accountid', 'memberid',
   'accesstoken', 'refreshtoken', 'idtoken', 'apikey', 'providersecret', 'clientsecret', 'secret', 'password',
-  'databaseurl', 'connectionstring', 'dsn',
+  'databaseurl', 'connectionstring', 'dsn', 'providersubject', 'leasetoken', 'tokenhash',
   'locationx', 'locationy', 'viewradians', 'spatial', 'position', 'coordinates', 'x', 'y', 'location', 'playersnapshots', 'plantlocation',
   'defuselocation', 'seasonref',
 ]);
