@@ -1,0 +1,16 @@
+{
+  "name": "@vsa/analytics",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Accepted analytics over CANONICAL contracts only. No SQL, no provider payload types, no Node I/O.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@vsa/contracts": "*"
+  }
+}

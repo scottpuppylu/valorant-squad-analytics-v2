@@ -1,0 +1,17 @@
+{
+  "name": "@vsa/source-adapters",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Provider adapters: provider payloads are converted to canonical contracts here and nowhere else.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fake": "./src/fake/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@vsa/contracts": "*"
+  }
+}

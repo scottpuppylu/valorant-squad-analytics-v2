@@ -1,0 +1,21 @@
+{
+  "name": "@vsa/canonical-data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical persistence over ordinary PostgreSQL (pg for PostgreSQL 18; PGlite for embedded demo/tests). The only package that runs SQL.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@vsa/contracts": "*",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  }
+}

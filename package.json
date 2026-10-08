@@ -1,0 +1,35 @@
+{
+  "name": "valorant-squad-analytics-v2",
+  "private": true,
+  "type": "module",
+  "description": "Provider-neutral, local-first squad analytics: local PostgreSQL canonical store, static versioned public snapshots.",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json && tsc -p apps/web/tsconfig.json",
+    "build": "npm run typecheck && npm run build --workspaces --if-present",
+    "check:architecture": "node scripts/check-architecture.ts",
+    "check:privacy": "npm run snapshot:demo && npm run build -w @vsa/web && node scripts/check-privacy.ts",
+    "snapshot:demo": "node apps/collector/src/cli.ts snapshot-demo --out apps/web/public/public-data",
+    "web:dev": "npm run dev -w @vsa/web",
+    "db:up": "docker compose -f infra/local/docker-compose.yml --env-file infra/local/.env up -d",
+    "db:down": "docker compose -f infra/local/docker-compose.yml --env-file infra/local/.env down",
+    "db:migrate": "node apps/collector/src/cli.ts migrate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "@types/node": "^24.7.2",
+    "eslint": "^9.37.0",
+    "globals": "^16.4.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.1",
+    "vitest": "^5.0.2"
+  }
+}

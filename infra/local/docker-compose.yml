@@ -1,0 +1,23 @@
+# Optional local canonical store: PostgreSQL 18, bound to localhost ONLY (never a public interface).
+# Usage: copy .env.example to .env (placeholders → local-only values), then `npm run db:up`.
+# The V2 runtime never needs a cloud database; the demo also works without this (embedded PGlite).
+name: vsa-v2-local
+services:
+  postgres:
+    image: postgres:18-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in infra/local/.env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in infra/local/.env}
+      POSTGRES_DB: ${POSTGRES_DB:-vsa_canonical}
+    ports:
+      - "127.0.0.1:${VSA_PG_PORT:-55432}:5432"
+    volumes:
+      - vsa-v2-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+volumes:
+  vsa-v2-pgdata:

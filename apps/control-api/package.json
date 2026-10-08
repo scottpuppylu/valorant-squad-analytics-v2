@@ -1,0 +1,16 @@
+{
+  "name": "@vsa/control-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Control-plane skeleton: groups, invites, consent and sync-job METADATA only. No telemetry, no auth, no deployment.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@vsa/contracts": "*"
+  }
+}

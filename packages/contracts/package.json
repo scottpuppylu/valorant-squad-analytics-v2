@@ -1,0 +1,23 @@
+{
+  "name": "@vsa/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Versioned domain contracts (Zod runtime schemas + inferred types). Browser-safe: no Node APIs.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./versions": "./src/versions.ts",
+    "./common": "./src/common.ts",
+    "./control": "./src/control.ts",
+    "./canonical": "./src/canonical.ts",
+    "./analysis": "./src/analysis.ts",
+    "./team-composition": "./src/teamComposition.ts",
+    "./public": "./src/public.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  }
+}

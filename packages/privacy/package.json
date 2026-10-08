@@ -1,0 +1,16 @@
+{
+  "name": "@vsa/privacy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Public serialization policy: explicit allowlists, private-key guard, secret patterns, schema validation. Browser-safe.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@vsa/contracts": "*"
+  }
+}

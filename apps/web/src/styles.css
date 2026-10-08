@@ -1,0 +1,37 @@
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --text: #16181d; --muted: #5d6573; --border: #d9dde3; --accent: #2457d6; --danger: #b42318;
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111318; --surface: #1a1d24; --text: #e8eaee; --muted: #9aa3b2; --border: #2c313b; --accent: #7aa2ff; --danger: #ff7b72; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); }
+.shell { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
+.nav { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.nav a { color: var(--muted); text-decoration: none; padding: 4px 0; }
+.nav a[aria-current="page"] { color: var(--accent); font-weight: 600; }
+.brand { font-weight: 700; margin-right: auto; }
+.main { padding-top: 24px; }
+h1 { margin: 0 0 8px; font-size: 1.6rem; }
+.page-header { margin-bottom: 16px; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 24px; margin: 0; color: var(--muted); font-size: 0.9rem; }
+.meta div { display: flex; gap: 6px; }
+.meta dt::after { content: "："; }
+.meta dd { margin: 0; }
+.cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.card h2 { margin: 0 0 10px; font-size: 1.1rem; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+.stats dt { color: var(--muted); font-size: 0.8rem; }
+.stats dd { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.evidence-note { margin-top: 20px; color: var(--muted); font-size: 0.85rem; }
+.status { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.status-privacy-failure, .status-invalid-manifest, .status-missing-snapshot, .status-unsupported-version { border-color: var(--danger); }
+.placeholder { background: var(--surface); border: 1px dashed var(--border); border-radius: 10px; padding: 16px 20px; }
+.table { width: 100%; border-collapse: collapse; background: var(--surface); }
+.table th, .table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.table { display: block; overflow-x: auto; }
+code { font-size: 0.85em; }
