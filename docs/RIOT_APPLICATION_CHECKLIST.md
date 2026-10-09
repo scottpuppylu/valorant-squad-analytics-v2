@@ -19,8 +19,8 @@ was sent. The package is [RIOT_PRODUCTION_APPLICATION.md](RIOT_PRODUCTION_APPLIC
 | `DOMAIN_STRATEGY` | OWNED_CUSTOM_DOMAIN |
 | `GITHUB_USER_SITE_WORKAROUND` | NOT_SELECTED |
 | `CUSTOM_DOMAIN` | MANUAL_ACTION_REQUIRED (the domain name is not chosen yet) |
-| `PRIVATE_CONTACT_STRATEGY` | DEDICATED_EMAIL_ALIAS (preferred shape `privacy@<owned-domain>`; optional `support@<owned-domain>`) |
-| `PRIVATE_CONTACT_CHANNEL` | MANUAL_ACTION_REQUIRED (`CONTACT_METHOD_PENDING = YES`; no address is invented or published) |
+| `PRIVATE_CONTACT_STRATEGY` | USER_APPROVED_EMAIL (supersedes DEDICATED_EMAIL_ALIAS, 2026-10-09; an owned-domain alias is optional future cleanup, not a blocker) |
+| `PRIVATE_CONTACT_CHANNEL` | READY (`PRIVATE_CONTACT_EMAIL = casper880115@gmail.com`, publication approved by the operator; `CONTACT_METHOD_PENDING = NO`) |
 
 **Domain reason.** Riot requires a root-verifiable website (`riot.txt` at the website root). The GitHub Pages project sub-path
 cannot serve a root file. A `*.github.io` root-host workaround is not selected because Riot does not explicitly establish it
@@ -34,7 +34,7 @@ it does not block submitting the synthetic Production application. No consent st
 | Item | Status | Evidence / note |
 |---|---|---|
 | Working public site | READY | https://scottpuppylu.github.io/valorant-squad-analytics-v2/ (synthetic demo with all user flows); SDD ruling: the synthetic prototype is sufficient to apply. Riot site verification still needs the owned domain (below) |
-| Use-case description | READY | Package §2 (SHORT / LONG descriptions, user value) |
+| Use-case description | READY | Package §2 (SHORT / LONG descriptions, user value); teammate comparison is branded **Diff Check** |
 | Privacy Policy | READY (draft) | `#/privacy`; [PRIVACY_POLICY.md](PRIVACY_POLICY.md), generated from the page source |
 | Terms of Service | READY (draft) | `#/terms`; [TERMS_OF_SERVICE.md](TERMS_OF_SERVICE.md), generated |
 | Opt-in disclaimer | READY (DRAFT FOR RIOT REVIEW) | Shown before the mock account-linking step; package §5 |
@@ -56,7 +56,7 @@ it does not block submitting the synthetic Production application. No consent st
 
 | Item | Status | Evidence / note |
 |---|---|---|
-| Private contact channel | MANUAL_ACTION_REQUIRED | `PRIVATE_CONTACT_STRATEGY = DEDICATED_EMAIL_ALIAS` (`privacy@<owned-domain>`, optional `support@<owned-domain>`); until supplied, `CONTACT_METHOD_PENDING = YES`. The public issue tracker stays for general, non-sensitive questions |
+| Private contact channel | READY | `casper880115@gmail.com` for privacy, data-access, deletion and consent requests (Privacy Policy §10, Terms §11, mailto link). The public issue tracker stays for general, non-sensitive questions |
 | Custom domain | MANUAL_ACTION_REQUIRED | `DOMAIN_STRATEGY = OWNED_CUSTOM_DOMAIN` (`GITHUB_USER_SITE_WORKAROUND = NOT_SELECTED`). Riot verifies the domain via `riot.txt` at the website root; this project sub-path cannot serve `/riot.txt`. Domain not chosen, purchased or configured |
 | Production application answers | READY (draft) | Package §2, all required fields |
 
@@ -97,12 +97,12 @@ it does not block submitting the synthetic Production application. No consent st
 | `APPLICATION_MATERIAL` | READY |
 | `SYNTHETIC_PROTOTYPE` | SUFFICIENT |
 | `TECHNICAL_PREAPPLICATION_BLOCKERS` | 0 |
-| `MANUAL_PREAPPLICATION_BLOCKERS` | 2: `CUSTOM_DOMAIN`, `PRIVATE_CONTACT_CHANNEL` |
+| `MANUAL_PREAPPLICATION_BLOCKERS` | 1: `CUSTOM_DOMAIN` |
+| `PRIVATE_CONTACT_CHANNEL` | READY |
 | `APPLICATION_SUBMITTED` | NO |
 | `REAL_DATA_PUBLICATION` | NO |
 
-The only pre-application blockers are the two manual items:
-1. a root-verifiable owned custom domain (`riot.txt`);
-2. a private contact channel (dedicated email alias).
+The only pre-application blocker is one manual item:
+1. a root-verifiable owned custom domain (`riot.txt`).
 
 The production key and the RSO client are then `BLOCKED_ON_RIOT_APPROVAL`.

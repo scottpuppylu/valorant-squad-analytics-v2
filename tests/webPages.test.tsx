@@ -47,7 +47,7 @@ describe('product pages render from the static snapshot only', () => {
 
   it('Dashboard: group title, coverage period, ranking by Current Strength, insufficient members listed separately, quick entries', () => {
     const page = html('#/');
-    for (const text of [state.group.group.name, '資料期間', '近期表現排序', '比較兩位成員', '組隊建議', '樣本不足（不列入排序）', 'Kite']) expect(page).toContain(text);
+    for (const text of [state.group.group.name, '資料期間', '近期表現排序', 'Diff Check', '組隊建議', '樣本不足（不列入排序）', 'Kite']) expect(page).toContain(text);
     const vm = dashboardViewModel(state);
     expect(vm.ranked.map((r) => r.rank)).toEqual(vm.ranked.map((_, i) => i + 1));
     expect(vm.insufficient.map((r) => r.profile.displayName)).toContain('Kite');

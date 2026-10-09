@@ -31,8 +31,8 @@ Companion documents:
 | `DOMAIN_STRATEGY` | OWNED_CUSTOM_DOMAIN |
 | `GITHUB_USER_SITE_WORKAROUND` | NOT_SELECTED |
 | `CUSTOM_DOMAIN` | MANUAL_ACTION_REQUIRED (the domain name is not chosen yet) |
-| `PRIVATE_CONTACT_STRATEGY` | DEDICATED_EMAIL_ALIAS (preferred shape `privacy@<owned-domain>`; optional `support@<owned-domain>`) |
-| `PRIVATE_CONTACT_CHANNEL` | MANUAL_ACTION_REQUIRED (`CONTACT_METHOD_PENDING = YES`; no address is invented or published) |
+| `PRIVATE_CONTACT_STRATEGY` | USER_APPROVED_EMAIL (supersedes DEDICATED_EMAIL_ALIAS, 2026-10-09; an owned-domain alias is optional future cleanup, not a blocker) |
+| `PRIVATE_CONTACT_CHANNEL` | READY (`PRIVATE_CONTACT_EMAIL = casper880115@gmail.com`, publication approved by the operator; `CONTACT_METHOD_PENDING = NO`) |
 
 **Domain reason.** Riot requires a root-verifiable website (`riot.txt` at the website root). The GitHub Pages project sub-path
 cannot serve a root file. A `*.github.io` root-host workaround is not selected because Riot does not explicitly establish it
@@ -101,7 +101,7 @@ The ticket stays open, with no response recorded.
 > **What members see:**
 > - their own statistics, and those of members who allowed group visibility;
 > - transparent community statistics, each with an explanation and its sample size;
-> - a shared-match comparison of two consenting members in matches they played together;
+> - **Diff Check**: a friendly comparison of two consenting teammates, including the matches they played together;
 > - historical team-composition suggestions (which agents and roles each member has historically played best), for
 >   planning before or after games.
 >
@@ -183,6 +183,7 @@ three separate permissions (default off) → sync request → statistics.
 | FEATURE | RIOT_POLICY_CATEGORY | OPT_IN_REQUIRED | STATUS | NOTES |
 |---|---|---|---|---|
 | Player stats (own) | Approved: showing player stats | YES | DEMO (synthetic) | Only after linking + permissions |
+| Diff Check (teammate comparison) | Approved: player stats (historical, opt-in) | YES (both members) | DEMO (synthetic) | Friendly within-squad comparison of two consenting members of the same group; all-history and same-match views kept separate; not scouting, not MMR / Elo, no lookup outside the group |
 | Group member stats | Approved: community stats for members (opt-in) | YES | DEMO (synthetic) | Invite-only; Group Visibility per member |
 | Shared-Match comparison | Approved: player stats (historical, opt-in) | YES (both members) | DEMO (synthetic) | Same-team shared matches of two consenting members; not MMR |
 | Team Builder | Approved: training / retrospective analytics | YES (all five) | DEMO (synthetic) | Historical fit; pre- / post-match planning |
@@ -268,7 +269,7 @@ production / runtime gap to close after approval.
 | Backend deployment (control plane) | NOT_IMPLEMENTED (`CONTROL_PLANE_DEPLOYED = NO`) |
 | Retention / deletion worker (scheduled, deletion requests) | PARTIAL (revocation contract only) |
 | Monitoring / incident handling | NOT_IMPLEMENTED |
-| Private contact channel (dedicated email alias) | MANUAL_ACTION_REQUIRED, **pre-application blocker** (`CONTACT_METHOD_PENDING = YES`) |
+| Private contact channel | READY (`casper880115@gmail.com`) |
 | Re-consent of the private evaluation group | Pending (9 × REQUIRES_RECONSENT); blocks real-data use / publication, not the application |
 
 **Control-plane status:**

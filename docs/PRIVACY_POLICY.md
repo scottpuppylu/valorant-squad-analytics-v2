@@ -66,7 +66,7 @@ These are different operations with different effects:
 - Revoke Data Collection: future collection stops, public eligibility ends, and a data-revocation request is sent to the data store, which removes your player-attributable precise spatial evidence (positions and view directions). Shared, non-attributable match records involving other players are not instantly deleted.
 - Disconnect your Riot account: the private account reference is cleared and every permission that depends on it is revoked as above.
 - Leave a group (or be removed): you stop being eligible for that group's pages and syncs; it does not by itself delete data.
-- Request deletion: deletion of other stored records on request is planned; the process is TBD_WITH_POLICY_REVIEW and will be handled through the contact method below.
+- Request deletion: email casper880115@gmail.com; handling of other stored records on request is planned and its exact process is TBD_WITH_POLICY_REVIEW.
 
 ## 8. Third-party services
 
@@ -80,7 +80,7 @@ No API key or credential is ever placed in the website or the public repository.
 
 General, non-sensitive questions: the project's public issue tracker (https://github.com/scottpuppylu/valorant-squad-analytics-v2/issues). Do not post personal data there.
 
-Private data requests (access, deletion): CONTACT_METHOD_PENDING — a private contact channel will be published before any real player data is processed.
+Private requests — privacy questions, data access, data deletion and consent questions: email casper880115@gmail.com.
 
 ## 11. Changes to this policy
 

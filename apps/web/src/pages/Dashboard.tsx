@@ -40,7 +40,7 @@ export function Dashboard({ state }: { state: ReadySnapshot }) {
       </header>
 
       <div className="quick">
-        <a className="quick-card" href={href.compare()}><strong>比較兩位成員</strong><span>全部紀錄與同場對戰分開比較</span></a>
+        <a className="quick-card" href={href.compare()}><strong>Diff Check</strong><span>隊內成員數據比較：全部紀錄與同場對戰分開看</span></a>
         <a className="quick-card" href="#/team-builder"><strong>組隊建議</strong><span>選 5 人＋地圖，看歷史契合度與分工（{vm.teamBuilderMaps.length} 張地圖）</span></a>
         <a className="quick-card" href="#/synergy"><strong>同場比較</strong><span>{vm.sharedPairsWithEvidence} 組搭檔有足夠的共同對戰</span></a>
       </div>

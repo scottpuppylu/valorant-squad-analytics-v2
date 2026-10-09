@@ -36,7 +36,7 @@ export function PlayerProfile({ state, memberId }: { state: ReadySnapshot; membe
           <div><dt>紀錄期間</dt><dd>{formatDate(vm.player?.firstObservedAt)} – {formatDate(vm.player?.lastObservedAt)}</dd></div>
         </dl>
         <HistoryNotice from={vm.player?.firstObservedAt} to={vm.player?.lastObservedAt} />
-        <p className="actions"><a className="button" href={href.compare(p.publicMemberId)}>與其他成員比較</a></p>
+        <p className="actions"><a className="button" href={href.compare(p.publicMemberId)}>Diff Check：與隊友比較</a></p>
       </header>
 
       <Section title="總覽">

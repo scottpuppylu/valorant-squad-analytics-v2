@@ -34,8 +34,9 @@ export function Compare({ state, a, b }: { state: ReadySnapshot; a: string | nul
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">比較</p>
-        <h1>比較兩位成員</h1>
+        <p className="eyebrow">隊內成員數據比較</p>
+        <h1>Diff Check</h1>
+        <p className="lede">比較同一群組裡兩位已同意成員的歷史數據。只限群組內成員，不能查詢群組外的玩家；不是牌位、MMR 或 Elo。</p>
         <HistoryNotice from={state.group.coverage.firstMatchAt} to={state.group.coverage.lastMatchAt} />
       </header>
       <form className="pickers" onSubmit={(e) => e.preventDefault()} aria-label="選擇要比較的兩位成員">

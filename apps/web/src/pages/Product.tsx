@@ -4,6 +4,7 @@ import { OPT_IN_DISCLAIMER, PRODUCT_NAME_EN, RIOT_LEGAL_BOILERPLATE } from '../l
 export const FEATURE_ALIGNMENT = [
   { feature: 'Player stats (own)', category: 'Approved: showing player stats', optIn: 'Yes', status: 'Demo (synthetic)', notes: 'Shown only after the player links and grants permissions.' },
   { feature: 'Group member stats', category: 'Approved: community stats for members (opt-in)', optIn: 'Yes', status: 'Demo (synthetic)', notes: 'Invite-only groups; each member grants Group Visibility separately.' },
+  { feature: 'Diff Check (teammate comparison)', category: 'Approved: player stats (historical, opt-in)', optIn: 'Yes (both members)', status: 'Demo (synthetic)', notes: 'Friendly within-squad comparison of two consenting members of the same group: all-history statistics and same-match views kept separate. Not scouting, not MMR / Elo, no lookup outside the group.' },
   { feature: 'Shared-Match comparison', category: 'Approved: player stats (opt-in), historical', optIn: 'Yes (both members)', status: 'Demo (synthetic)', notes: 'Compares two consenting members in matches they played together on the same team. Not MMR.' },
   { feature: 'Team Builder', category: 'Approved: training / retrospective analytics', optIn: 'Yes (all five)', status: 'Demo (synthetic)', notes: 'Historical agent/role fit for pre- or post-match planning. No live data, no positions, no in-match instructions.' },
   { feature: 'Aggregate group analytics', category: 'Approved: aggregate stats', optIn: 'Members shown individually: yes', status: 'Demo (synthetic)', notes: 'Group totals over consenting members only.' },
@@ -27,8 +28,8 @@ export function Product() {
         <ul className="plain">
           <li>Private / invite-only friend groups review their own VALORANT matches together.</li>
           <li>Each opted-in member sees their own statistics and the statistics of members who allowed group visibility.</li>
-          <li>Historical derived analytics: transparent community scores with explanations and sample sizes, shared-match comparison between two consenting members, and historical team-composition suggestions.</li>
-          <li>Live demo with fictional data: <a href="#/">Dashboard</a> · <a href="#/players">Players</a> · <a href="#/compare">Compare</a> · <a href="#/synergy">Shared-Match</a> · <a href="#/team-builder">Team Builder</a>.</li>
+          <li>Historical derived analytics: transparent community scores with explanations and sample sizes, Diff Check (friendly comparison of two consenting teammates, including their shared matches), and historical team-composition suggestions.</li>
+          <li>Live demo with fictional data: <a href="#/">Dashboard</a> · <a href="#/players">Players</a> · <a href="#/compare">Diff Check</a> · <a href="#/synergy">Shared-Match</a> · <a href="#/team-builder">Team Builder</a>.</li>
         </ul>
       </section>
 

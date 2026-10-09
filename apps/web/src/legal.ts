@@ -9,6 +9,8 @@ export const PRODUCT_NAME_EN = 'Goblin Survey (哥布林大調查)';
 export const POLICY_VERSION = 'policy-draft-2026-10-09';
 export const POLICY_DATE = '2026-10-09';
 export const REPOSITORY_ISSUES_URL = 'https://github.com/scottpuppylu/valorant-squad-analytics-v2/issues';
+/** Private contact for privacy, data-access, deletion and consent requests (publication explicitly approved by the operator, 2026-10-09). */
+export const PRIVATE_CONTACT_EMAIL = 'casper880115@gmail.com';
 
 /**
  * Riot Games Developer API Policy legal boilerplate (General Policies, "[Your product]" placeholder), retrieved
@@ -85,7 +87,7 @@ export const PRIVACY_POLICY: PolicyDocument = {
       'Revoke Data Collection: future collection stops, public eligibility ends, and a data-revocation request is sent to the data store, which removes your player-attributable precise spatial evidence (positions and view directions). Shared, non-attributable match records involving other players are not instantly deleted.',
       'Disconnect your Riot account: the private account reference is cleared and every permission that depends on it is revoked as above.',
       'Leave a group (or be removed): you stop being eligible for that group\'s pages and syncs; it does not by itself delete data.',
-      'Request deletion: deletion of other stored records on request is planned; the process is TBD_WITH_POLICY_REVIEW and will be handled through the contact method below.',
+      `Request deletion: email ${PRIVATE_CONTACT_EMAIL}; handling of other stored records on request is planned and its exact process is TBD_WITH_POLICY_REVIEW.`,
     ] },
     { id: 'third-parties', title: '8. Third-party services', paragraphs: [
       'Today: GitHub (website hosting). Future approved mode: Riot Games (Riot Sign On and the official VALORANT API) as the intended data source. A third-party VALORANT API was used only for private local evaluation and is not the planned public data backbone. Data is never sold.',
@@ -95,7 +97,7 @@ export const PRIVACY_POLICY: PolicyDocument = {
     ] },
     { id: 'contact', title: '10. Contact', paragraphs: [
       `General, non-sensitive questions: the project's public issue tracker (${REPOSITORY_ISSUES_URL}). Do not post personal data there.`,
-      'Private data requests (access, deletion): CONTACT_METHOD_PENDING — a private contact channel will be published before any real player data is processed.',
+      `Private requests — privacy questions, data access, data deletion and consent questions: email ${PRIVATE_CONTACT_EMAIL}.`,
     ] },
     { id: 'updates', title: '11. Changes to this policy', paragraphs: [
       `Version ${POLICY_VERSION} (${POLICY_DATE}). This is a draft prepared for the planned Riot application. Material changes will be shown on this page with a new version and date before they apply to collected data; permissions you granted under an older version are not silently extended.`,
@@ -146,7 +148,7 @@ export const TERMS_OF_SERVICE: PolicyDocument = {
       'This product is not an official Riot Games product, and no approval by Riot Games is implied. Riot Games may change or revoke API access at any time.',
     ] },
     { id: 'changes', title: '11. Changes', paragraphs: [
-      `Version ${POLICY_VERSION} (${POLICY_DATE}), draft. Contact: see the Privacy Policy.`,
+      `Version ${POLICY_VERSION} (${POLICY_DATE}), draft. Contact: ${PRIVATE_CONTACT_EMAIL} (privacy and data requests); general questions: see the Privacy Policy.`,
     ] },
   ],
 };

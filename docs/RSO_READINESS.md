@@ -19,7 +19,8 @@ V2-CONSENT-CONTROL-PLANE-01 (2026-10-09). Status: **design / interfaces only**.
 **SDD rulings (2026-10-09):**
 - None of these is required before applying: live RSO, real product sign-in, a durable control-plane DB, real-member re-consent.
 - Re-consent is still required before any real data is used or published.
-- The only pre-application blockers are the owned custom domain and a private contact alias, both `MANUAL_ACTION_REQUIRED`.
+- The private contact channel is READY (user-approved email, 2026-10-09).
+- The only pre-application blocker is the owned custom domain (`MANUAL_ACTION_REQUIRED`).
 - See [RIOT_APPLICATION_CHECKLIST.md](RIOT_APPLICATION_CHECKLIST.md).
 
 **Riot requirements** (official docs, retrieved 2026-10-09; details in

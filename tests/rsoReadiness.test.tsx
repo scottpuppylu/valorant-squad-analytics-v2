@@ -8,10 +8,10 @@ import { runDemoPipeline } from '@vsa/collector';
 import { Shell } from '../apps/web/src/App.tsx';
 import { loadSnapshot, type Fetcher, type ReadySnapshot, type SnapshotState } from '../apps/web/src/data/loadSnapshot.ts';
 import { canGrant, DEMO_SYNC_MATCHES, demoReducer, groupCanSee, INITIAL_DEMO_STATE, publicationEligible, syncAllowed, type DemoAction, type DemoState } from '../apps/web/src/demoFlow.ts';
-import { OPT_IN_DISCLAIMER, PRIVACY_POLICY, RIOT_LEGAL_BOILERPLATE, TERMS_OF_SERVICE } from '../apps/web/src/legal.ts';
+import { OPT_IN_DISCLAIMER, PRIVACY_POLICY, PRIVATE_CONTACT_EMAIL, RIOT_LEGAL_BOILERPLATE, TERMS_OF_SERVICE } from '../apps/web/src/legal.ts';
 import { DemoFlowView } from '../apps/web/src/pages/DemoFlow.tsx';
 import { FEATURE_ALIGNMENT } from '../apps/web/src/pages/Product.tsx';
-import { parseRoute, routePath } from '../apps/web/src/router.ts';
+import { parseRoute, ROUTES, routePath } from '../apps/web/src/router.ts';
 import { LEGAL_DOCS } from '../scripts/legal-docs.ts';
 import { ACTIVATED_AT, OBSERVED_AT } from './helpers.ts';
 
@@ -59,7 +59,8 @@ describe('public review routes (static, deep-link safe)', () => {
     for (const s of ['CURRENT SYNTHETIC DEMO', 'FUTURE APPROVED RSO MODE (not live)', 'Data categories', 'Purpose', 'Retention', 'Revocation and deletion', 'Publication eligibility',
       'Third-party services', 'Security', 'Contact', 'Changes to this policy', 'Product account data', 'External identity references', 'Consent metadata', 'Group and invite metadata',
       'Match / game data', 'Derived analytics', 'Provider provenance', 'Audit and security metadata', 'UNTIL_USER_REVOCATION', 'OPERATIONAL_NECESSITY', 'TBD_WITH_POLICY_REVIEW',
-      'CONTACT_METHOD_PENDING', 'must re-consent']) expect(t).toContain(s);
+      PRIVATE_CONTACT_EMAIL, 'must re-consent']) expect(t).toContain(s);
+    expect(t).not.toContain('CONTACT_METHOD_PENDING');
     expect(t).not.toMatch(/we currently collect riot account data/iu);
     expect(t).not.toMatch(/(?<!not )opted in\b.*real members/iu);
   });
@@ -170,5 +171,41 @@ describe('source-level guarantees', () => {
       'CONTROL_PLANE_PERSISTENCE = PROTOTYPE_ONLY', 'OWN_DOMAIN_RECOMMENDED', 'RIOT_SUPPORT_RESPONSE_RECEIVED = NO']) expect(app).toContain(s);
     const rso = await readFile('docs/RSO_READINESS.md', 'utf8');
     expect(rso).toContain('NOT_IMPLEMENTED');
+  });
+});
+
+describe('Diff Check branding and approved private contact (V2-DIFF-CHECK-CONTACT-01)', () => {
+  it('the teammate comparison is labelled Diff Check while the #/compare route stays compatible', () => {
+    expect(ROUTES.find((r) => r.path === '/compare')?.label).toBe('Diff Check');
+    const route = parseRoute('#/compare?a=m_0000000000000000&b=m_1111111111111111');
+    expect(route).toMatchObject({ page: 'compare', a: 'm_0000000000000000', b: 'm_1111111111111111' });
+    expect(parseRoute(`#${routePath(route)}`).page).toBe('compare'); // reload keeps the page
+    const markup = renderToString(<Shell route={parseRoute('#/compare')} state={ready} />);
+    expect(markup).toMatch(/<h1>Diff Check<\/h1>/u);
+    expect(text(markup)).toContain('隊內成員數據比較');
+    expect(text(markup)).toMatch(/不是牌位、MMR 或 Elo/u);
+    for (const hash of ['#/', '#/product', '#/demo-flow']) expect(page(hash)).toContain('Diff Check');
+    const product = FEATURE_ALIGNMENT.find((r) => r.feature.startsWith('Diff Check'))!;
+    expect(product.notes).toMatch(/Not scouting, not MMR \/ Elo/u);
+  });
+
+  it('privacy and terms publish the approved contact email as a mailto link; the placeholder is gone', () => {
+    expect(PRIVATE_CONTACT_EMAIL).toBe('casper880115@gmail.com');
+    const privacy = renderToString(<Shell route={parseRoute('#/privacy')} state={ready} />);
+    expect(privacy).toContain('href="mailto:casper880115@gmail.com"');
+    expect(page('#/terms')).toContain('casper880115@gmail.com');
+    for (const hash of ['#/privacy', '#/terms', '#/product']) expect(page(hash)).not.toContain('CONTACT_METHOD_PENDING');
+  });
+
+  it('the application checklist lists exactly one pre-application blocker: CUSTOM_DOMAIN', async () => {
+    const checklist = await readFile('docs/RIOT_APPLICATION_CHECKLIST.md', 'utf8');
+    expect(checklist).toContain('| `MANUAL_PREAPPLICATION_BLOCKERS` | 1: `CUSTOM_DOMAIN` |');
+    expect(checklist).toContain('| `PRIVATE_CONTACT_CHANNEL` | READY |');
+    expect(checklist).toContain('| `TECHNICAL_PREAPPLICATION_BLOCKERS` | 0 |');
+    expect(checklist).toContain('| `READINESS` | PARTIAL |');
+    expect(checklist).not.toMatch(/PRIVATE_CONTACT_CHANNEL` \| MANUAL_ACTION_REQUIRED/u);
+    for (const doc of ['docs/RIOT_APPLICATION_CHECKLIST.md', 'docs/RIOT_PRODUCTION_APPLICATION.md', 'docs/RSO_READINESS.md']) {
+      expect(await readFile(doc, 'utf8')).not.toMatch(/CONTACT_METHOD_PENDING = YES/u);
+    }
   });
 });

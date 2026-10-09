@@ -57,4 +57,4 @@ This product is not an official Riot Games product, and no approval by Riot Game
 
 ## 11. Changes
 
-Version policy-draft-2026-10-09 (2026-10-09), draft. Contact: see the Privacy Policy.
+Version policy-draft-2026-10-09 (2026-10-09), draft. Contact: casper880115@gmail.com (privacy and data requests); general questions: see the Privacy Policy.

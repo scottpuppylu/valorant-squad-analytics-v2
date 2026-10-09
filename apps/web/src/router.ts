@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 export const ROUTES = [
   { path: '/', label: '總覽' },
   { path: '/players', label: '玩家' },
-  { path: '/compare', label: '比較' },
+  { path: '/compare', label: 'Diff Check' },
   { path: '/synergy', label: '同場比較' },
   { path: '/team-builder', label: '組隊建議' },
   { path: '/about', label: '資料與方法' },

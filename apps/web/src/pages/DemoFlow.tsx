@@ -94,7 +94,7 @@ export function DemoFlowView({ state, dispatch }: { state: DemoState; dispatch: 
           <div><dt>群組成員看得到</dt><dd data-state="group-visible">{groupCanSee(state) ? '是' : '否'}</dd></div>
           <div><dt>可進入公開頁面</dt><dd data-state="public-eligible">{publicationEligible(state) ? '是' : '否'}</dd></div>
         </dl>
-        {state.sync === 'SUCCEEDED' ? <p>看看合成的分析結果長什麼樣子：<a href="#/players">玩家</a>、<a href="#/compare">比較</a>、<a href="#/team-builder">組隊建議</a>（全部是虛構示範資料）。</p> : null}
+        {state.sync === 'SUCCEEDED' ? <p>看看合成的分析結果長什麼樣子：<a href="#/players">玩家</a>、<a href="#/compare">Diff Check</a>、<a href="#/team-builder">組隊建議</a>（全部是虛構示範資料）。</p> : null}
       </Step>
 
       <Step n={8} title="撤回授權" done={state.revocationRequested}>
