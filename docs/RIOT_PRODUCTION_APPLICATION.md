@@ -17,6 +17,30 @@ Companion documents:
 - [RSO_READINESS.md](RSO_READINESS.md);
 - [CONTROL_PLANE_DESIGN.md](CONTROL_PLANE_DESIGN.md) and [CONTROL_PLANE_THREAT_MODEL.md](CONTROL_PLANE_THREAT_MODEL.md).
 
+## SDD rulings (binding, accepted 2026-10-09; V2-RSO-READINESS-RULING-SYNC-01)
+
+| Ruling | Value |
+|---|---|
+| `SYNTHETIC_PROTOTYPE_SUFFICIENT_TO_APPLY` | YES |
+| `DURABLE_CONTROL_DB_REQUIRED_BEFORE_APPLICATION` | NO |
+| `REAL_PRODUCT_SIGN_IN_REQUIRED_BEFORE_APPLICATION` | NO |
+| `LIVE_RSO_REQUIRED_BEFORE_APPLICATION` | NO |
+| `REAL_MEMBER_RECONSENT_REQUIRED_BEFORE_APPLICATION` | NO |
+| `REAL_MEMBER_RECONSENT_REQUIRED_BEFORE_REAL_DATA_USE_OR_PUBLICATION` | YES |
+| `APPLICATION_SUBMITTED` | NO |
+| `DOMAIN_STRATEGY` | OWNED_CUSTOM_DOMAIN |
+| `GITHUB_USER_SITE_WORKAROUND` | NOT_SELECTED |
+| `CUSTOM_DOMAIN` | MANUAL_ACTION_REQUIRED (the domain name is not chosen yet) |
+| `PRIVATE_CONTACT_STRATEGY` | DEDICATED_EMAIL_ALIAS (preferred shape `privacy@<owned-domain>`; optional `support@<owned-domain>`) |
+| `PRIVATE_CONTACT_CHANNEL` | MANUAL_ACTION_REQUIRED (`CONTACT_METHOD_PENDING = YES`; no address is invented or published) |
+
+**Domain reason.** Riot requires a root-verifiable website (`riot.txt` at the website root). The GitHub Pages project sub-path
+cannot serve a root file. A `*.github.io` root-host workaround is not selected because Riot does not explicitly establish it
+as an acceptable production verification domain.
+
+**Real members.** The 9 imported members stay `REQUIRES_RECONSENT`. That blocks any use or publication of their real data;
+it does not block submitting the synthetic Production application. No consent state was changed.
+
 ## 1. Current Riot policy (official sources only, retrieved 2026-10-09)
 
 | Requirement | Finding (paraphrased) | Official source |
@@ -44,7 +68,8 @@ Companion documents:
 - Riot verifies ownership of the domain where the application is hosted, through `riot.txt` at the root of the website.
 - The current demo is a GitHub Pages **project** site under a sub-path (`scottpuppylu.github.io/valorant-squad-analytics-v2/`). This repository cannot place a file at that host's root.
 - Whether a `*.github.io` host is acceptable at all is **not stated** by Riot.
-- A product-owned domain (or at least a root-served site) is therefore recommended before applying. It is a readiness item; nothing was purchased or configured.
+- A product-owned domain is therefore recommended before applying.
+- SDD decision: `DOMAIN_STRATEGY = OWNED_CUSTOM_DOMAIN`, `GITHUB_USER_SITE_WORKAROUND = NOT_SELECTED`, `CUSTOM_DOMAIN = MANUAL_ACTION_REQUIRED`. Nothing was purchased or configured.
 
 **Questions the ticket asked that the docs now answer.** The current official docs answer these independently of ticket #139243830:
 - VALORANT has no personal keys;
@@ -228,11 +253,14 @@ Riot has not reviewed or approved this text. It is shown in-app before the (mock
 
 ## 7. Production architecture gap list (not hidden)
 
+Only the rows marked **pre-application blocker** stop the application from being submitted. Everything else is a
+production / runtime gap to close after approval.
+
 | Gap | Status |
 |---|---|
-| Approved Riot Production key | BLOCKED: requires application approval |
-| Approved RSO client | BLOCKED: requires an approved production application |
-| Verified, root-served website / product-owned domain | MANUAL_ACTION_REQUIRED (`riot.txt` at the site root) |
+| Approved Riot Production key | BLOCKED_ON_RIOT_APPROVAL |
+| Approved RSO client | BLOCKED_ON_RIOT_APPROVAL |
+| Owned custom domain (root-verifiable, `riot.txt`) | MANUAL_ACTION_REQUIRED, **pre-application blocker** |
 | Real product authentication (sign-in, sessions) | NOT_IMPLEMENTED |
 | Secure token / session storage (RSO tokens used only server-side) | NOT_IMPLEMENTED |
 | OAuth callback infrastructure (redirect URI, PKCE, server exchange) | NOT_IMPLEMENTED |
@@ -240,8 +268,8 @@ Riot has not reviewed or approved this text. It is shown in-app before the (mock
 | Backend deployment (control plane) | NOT_IMPLEMENTED (`CONTROL_PLANE_DEPLOYED = NO`) |
 | Retention / deletion worker (scheduled, deletion requests) | PARTIAL (revocation contract only) |
 | Monitoring / incident handling | NOT_IMPLEMENTED |
-| Private contact channel for data requests | MANUAL_ACTION_REQUIRED (`CONTACT_METHOD_PENDING`) |
-| Re-consent of the private evaluation group | Pending (9 × REQUIRES_RECONSENT) |
+| Private contact channel (dedicated email alias) | MANUAL_ACTION_REQUIRED, **pre-application blocker** (`CONTACT_METHOD_PENDING = YES`) |
+| Re-consent of the private evaluation group | Pending (9 × REQUIRES_RECONSENT); blocks real-data use / publication, not the application |
 
 **Control-plane status:**
 - `CONTROL_PLANE_DOMAIN = IMPLEMENTED`

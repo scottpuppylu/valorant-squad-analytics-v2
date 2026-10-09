@@ -16,6 +16,12 @@ V2-CONSENT-CONTROL-PLANE-01 (2026-10-09). Status: **design / interfaces only**.
 - `LIVE_AUTHENTICATION = NO`
 - `LIVE_RSO = NO`
 
+**SDD rulings (2026-10-09):**
+- None of these is required before applying: live RSO, real product sign-in, a durable control-plane DB, real-member re-consent.
+- Re-consent is still required before any real data is used or published.
+- The only pre-application blockers are the owned custom domain and a private contact alias, both `MANUAL_ACTION_REQUIRED`.
+- See [RIOT_APPLICATION_CHECKLIST.md](RIOT_APPLICATION_CHECKLIST.md).
+
 **Riot requirements** (official docs, retrieved 2026-10-09; details in
 [RIOT_PRODUCTION_APPLICATION.md](RIOT_PRODUCTION_APPLICATION.md)):
 - RSO clients exist only for an approved production application;
