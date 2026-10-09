@@ -20,7 +20,9 @@ V2-CONSENT-CONTROL-PLANE-01 (2026-10-09). Status: **design / interfaces only**.
 - None of these is required before applying: live RSO, real product sign-in, a durable control-plane DB, real-member re-consent.
 - Re-consent is still required before any real data is used or published.
 - The private contact channel is READY (user-approved email, 2026-10-09).
-- The only pre-application blocker is the owned custom domain (`MANUAL_ACTION_REQUIRED`).
+- The root-verifiable site is READY: the free GitHub user site https://scottpuppylu.github.io/ serves root files.
+- `MANUAL_PREAPPLICATION_BLOCKERS = 0`; `READINESS = READY_TO_APPLY_WITH_PLATFORM_DOMAIN_RISK`.
+- Riot acceptance of `*.github.io` is UNCONFIRMED. The fallback is an owned custom domain. The application is not submitted.
 - See [RIOT_APPLICATION_CHECKLIST.md](RIOT_APPLICATION_CHECKLIST.md).
 
 **Riot requirements** (official docs, retrieved 2026-10-09; details in

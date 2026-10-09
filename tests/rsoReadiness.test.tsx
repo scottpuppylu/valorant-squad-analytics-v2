@@ -197,12 +197,17 @@ describe('Diff Check branding and approved private contact (V2-DIFF-CHECK-CONTAC
     for (const hash of ['#/privacy', '#/terms', '#/product']) expect(page(hash)).not.toContain('CONTACT_METHOD_PENDING');
   });
 
-  it('the application checklist lists exactly one pre-application blocker: CUSTOM_DOMAIN', async () => {
+  it('the application checklist lists no pre-application blocker and keeps the github.io acceptance risk explicit', async () => {
     const checklist = await readFile('docs/RIOT_APPLICATION_CHECKLIST.md', 'utf8');
-    expect(checklist).toContain('| `MANUAL_PREAPPLICATION_BLOCKERS` | 1: `CUSTOM_DOMAIN` |');
+    expect(checklist).toContain('| `MANUAL_PREAPPLICATION_BLOCKERS` | 0 |');
+    expect(checklist).toContain('| `ROOT_VERIFIABLE_SITE` | READY |');
+    expect(checklist).toContain('| `RIOT_SITE_VERIFICATION_COMPLETED` | NO |');
+    expect(checklist).toContain('UNCONFIRMED (external review risk)');
+    expect(checklist).not.toMatch(/RIOT_SITE_VERIFIED|RIOT_DOMAIN_APPROVED/u);
     expect(checklist).toContain('| `PRIVATE_CONTACT_CHANNEL` | READY |');
     expect(checklist).toContain('| `TECHNICAL_PREAPPLICATION_BLOCKERS` | 0 |');
-    expect(checklist).toContain('| `READINESS` | PARTIAL |');
+    expect(checklist).toContain('| `READINESS` | READY_TO_APPLY_WITH_PLATFORM_DOMAIN_RISK |');
+    expect(checklist).toContain('| `APPLICATION_SUBMITTED` | NO |');
     expect(checklist).not.toMatch(/PRIVATE_CONTACT_CHANNEL` \| MANUAL_ACTION_REQUIRED/u);
     for (const doc of ['docs/RIOT_APPLICATION_CHECKLIST.md', 'docs/RIOT_PRODUCTION_APPLICATION.md', 'docs/RSO_READINESS.md']) {
       expect(await readFile(doc, 'utf8')).not.toMatch(/CONTACT_METHOD_PENDING = YES/u);

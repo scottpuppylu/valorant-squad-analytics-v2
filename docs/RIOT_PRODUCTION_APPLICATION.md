@@ -28,15 +28,25 @@ Companion documents:
 | `REAL_MEMBER_RECONSENT_REQUIRED_BEFORE_APPLICATION` | NO |
 | `REAL_MEMBER_RECONSENT_REQUIRED_BEFORE_REAL_DATA_USE_OR_PUBLICATION` | YES |
 | `APPLICATION_SUBMITTED` | NO |
-| `DOMAIN_STRATEGY` | OWNED_CUSTOM_DOMAIN |
-| `GITHUB_USER_SITE_WORKAROUND` | NOT_SELECTED |
-| `CUSTOM_DOMAIN` | MANUAL_ACTION_REQUIRED (the domain name is not chosen yet) |
+| `ROOT_SITE_STRATEGY` | GITHUB_USER_SITE_FREE (supersedes OWNED_CUSTOM_DOMAIN, user decision 2026-10-09) |
+| `ROOT_SITE_URL` | https://scottpuppylu.github.io/ (repository `scottpuppylu/scottpuppylu.github.io`) |
+| `ROOT_FILE_CAPABILITY` | VERIFIED: https://scottpuppylu.github.io/site-control.txt is served at the root (HTTP 200; explicitly not a Riot token) |
+| `ROOT_VERIFIABLE_SITE` | READY |
+| `RIOT_TXT_PRESENT` | NO (404 by design; a CI guard rejects an early file) |
+| `RIOT_TXT_CONTENT_RECEIVED` | NO |
+| `RIOT_TXT_READY_TO_ADD` | YES (procedure in the root repository README) |
+| `RIOT_SITE_VERIFICATION_COMPLETED` | NO |
+| `RIOT_GITHUB_IO_ACCEPTANCE` / `PLATFORM_DOMAIN_ACCEPTANCE_BY_RIOT` | UNCONFIRMED |
+| `OWNED_CUSTOM_DOMAIN` | DEFERRED_FALLBACK |
+| `FALLBACK_IF_RIOT_REJECTS_GITHUB_IO` | OWNED_CUSTOM_DOMAIN |
 | `PRIVATE_CONTACT_STRATEGY` | USER_APPROVED_EMAIL (supersedes DEDICATED_EMAIL_ALIAS, 2026-10-09; an owned-domain alias is optional future cleanup, not a blocker) |
 | `PRIVATE_CONTACT_CHANNEL` | READY (`PRIVATE_CONTACT_EMAIL = casper880115@gmail.com`, publication approved by the operator; `CONTACT_METHOD_PENDING = NO`) |
 
-**Domain reason.** Riot requires a root-verifiable website (`riot.txt` at the website root). The GitHub Pages project sub-path
-cannot serve a root file. A `*.github.io` root-host workaround is not selected because Riot does not explicitly establish it
-as an acceptable production verification domain.
+**Root-site reason.** Riot requires a root-verifiable website (`riot.txt` at the website root). The GitHub Pages project
+sub-path cannot serve a root file. The free GitHub user site `https://scottpuppylu.github.io/` can, and that was verified with
+`site-control.txt`. Riot does not explicitly state whether a `*.github.io` host is acceptable. That is an external review
+risk (`RIOT_GITHUB_IO_ACCEPTANCE = UNCONFIRMED`), with an owned custom domain as the fallback. Riot has not verified or
+approved the site.
 
 **Real members.** The 9 imported members stay `REQUIRES_RECONSENT`. That blocks any use or publication of their real data;
 it does not block submitting the synthetic Production application. No consent state was changed.
@@ -68,8 +78,10 @@ it does not block submitting the synthetic Production application. No consent st
 - Riot verifies ownership of the domain where the application is hosted, through `riot.txt` at the root of the website.
 - The current demo is a GitHub Pages **project** site under a sub-path (`scottpuppylu.github.io/valorant-squad-analytics-v2/`). This repository cannot place a file at that host's root.
 - Whether a `*.github.io` host is acceptable at all is **not stated** by Riot.
-- A product-owned domain is therefore recommended before applying.
-- SDD decision: `DOMAIN_STRATEGY = OWNED_CUSTOM_DOMAIN`, `GITHUB_USER_SITE_WORKAROUND = NOT_SELECTED`, `CUSTOM_DOMAIN = MANUAL_ACTION_REQUIRED`. Nothing was purchased or configured.
+- A product-owned domain was therefore originally recommended.
+- Current decision (2026-10-09): `ROOT_SITE_STRATEGY = GITHUB_USER_SITE_FREE`. The root site https://scottpuppylu.github.io/ is live and
+  serves root files (`/site-control.txt` verified); `riot.txt` will be added only with Riot's exact content.
+- `OWNED_CUSTOM_DOMAIN = DEFERRED_FALLBACK`, used only if Riot rejects the github.io site. Nothing was purchased or configured.
 
 **Questions the ticket asked that the docs now answer.** The current official docs answer these independently of ticket #139243830:
 - VALORANT has no personal keys;
@@ -254,14 +266,14 @@ Riot has not reviewed or approved this text. It is shown in-app before the (mock
 
 ## 7. Production architecture gap list (not hidden)
 
-Only the rows marked **pre-application blocker** stop the application from being submitted. Everything else is a
-production / runtime gap to close after approval.
+No row currently blocks submitting the application (`MANUAL_PREAPPLICATION_BLOCKERS = 0`). The remaining rows are
+production / runtime gaps to close after approval.
 
 | Gap | Status |
 |---|---|
 | Approved Riot Production key | BLOCKED_ON_RIOT_APPROVAL |
 | Approved RSO client | BLOCKED_ON_RIOT_APPROVAL |
-| Owned custom domain (root-verifiable, `riot.txt`) | MANUAL_ACTION_REQUIRED, **pre-application blocker** |
+| Root-verifiable site (`riot.txt` at the root) | READY: https://scottpuppylu.github.io/ (free user site; Riot acceptance of `*.github.io` UNCONFIRMED; owned custom domain = DEFERRED_FALLBACK) |
 | Real product authentication (sign-in, sessions) | NOT_IMPLEMENTED |
 | Secure token / session storage (RSO tokens used only server-side) | NOT_IMPLEMENTED |
 | OAuth callback infrastructure (redirect URI, PKCE, server exchange) | NOT_IMPLEMENTED |
